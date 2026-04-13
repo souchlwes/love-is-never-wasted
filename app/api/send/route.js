@@ -6,6 +6,7 @@ export async function POST(request) {
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime, attachments = [];
 
+    // 1. SCENARIO A: QStash is waking the site up
     if (contentType.includes('application/json')) {
       const body = await request.json();
       to = body.to;
@@ -17,8 +18,10 @@ export async function POST(request) {
            content: Buffer.from(body.attachmentBase64, 'base64')
          });
       }
-      sendTime = null;
-    } else {
+      sendTime = null; 
+    } 
+    // 2. SCENARIO B: A user is clicking "Send" on the site
+    else {
       const formData = await request.formData();
       to = formData.get('to');
       subject = formData.get('subject');
@@ -58,6 +61,7 @@ export async function POST(request) {
     } else {
        const scheduledDate = new Date(sendTime);
        
+       // Safety check: if time is in the past, send now
        if (scheduledDate < new Date()) {
          await transporter.sendMail({
            from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
@@ -65,7 +69,7 @@ export async function POST(request) {
            subject,
            text: message,
          });
-         return NextResponse.json({ success: true, message: "Sent immediately (time was in the past)!" });
+         return NextResponse.json({ success: true, message: "Sent immediately!" });
        }
 
        const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
@@ -77,10 +81,18 @@ export async function POST(request) {
          attachmentBase64: attachments.length > 0 ? attachments[0].base64 : null
        };
 
-       const targetUrl = 'https://loveisneverwasted.vercel.app/api/send';
+       // NEW: Check payload size (Upstash Free limit is 1MB)
+       const payloadSize = JSON.stringify(payload).length;
+       if (payloadSize > 1000000) {
+         throw new Error("Message or attachment is too large for scheduling (max 1MB).");
+       }
 
-       // ✅ UPDATED: Added ".us-east-1" to the URL
-       const qstashResponse = await fetch(`https://qstash.us-east-1.upstash.io/v2/publish/${targetUrl}`, {
+       const targetUrl = 'https://loveisneverwasted.vercel.app/api/send';
+       
+       // ✅ FIX: Using encodeURIComponent ensures the URL is safe to send
+       const qstashEndpoint = `https://qstash.us-east-1.upstash.io/v2/publish/${encodeURIComponent(targetUrl)}`;
+
+       const qstashResponse = await fetch(qstashEndpoint, {
          method: 'POST',
          headers: {
            'Authorization': `Bearer ${process.env.QSTASH_TOKEN}`,
@@ -92,7 +104,6 @@ export async function POST(request) {
 
        if (!qstashResponse.ok) {
          const errorText = await qstashResponse.text();
-         console.error("QStash Error Details:", errorText);
          throw new Error(`QStash rejected: ${errorText}`);
        }
 
@@ -100,7 +111,9 @@ export async function POST(request) {
     }
 
   } catch (error) {
-    console.error("Email Error:", error.message);
+    // Better logging for Vercel
+    console.error("DEBUG - Email Error Name:", error.name);
+    console.error("DEBUG - Email Error Message:", error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
