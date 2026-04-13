@@ -39,10 +39,10 @@ export async function POST(request) {
     const scheduleWithHttps = () => {
       return new Promise((resolve, reject) => {
         const options = {
-          // ✅ FIXED: Changed the dot to a dash in the hostname
-          hostname: 'qstash-us-east-1.upstash.io', 
+          hostname: 'qstash-us-east-1.upstash.io',
           port: 443,
-          path: `/v1/publish/${targetUrl}`,
+          // ✅ CHANGED: Changed v1 to v2
+          path: `/v2/publish/${targetUrl}`, 
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${cleanToken}`,
@@ -70,7 +70,7 @@ export async function POST(request) {
       });
     };
 
-    console.log("Calling Upstash US-East-1...");
+    console.log("Calling Upstash v2 US-East-1...");
     await scheduleWithHttps();
 
     return NextResponse.json({ success: true, message: "Queued!" });
