@@ -235,6 +235,8 @@ export default function MacMailer() {
                 <div
                   className="rich-editor"
                   contentEditable
+                  spellCheck="false" // ✅ Fixes the "cross mark" issue
+                  autoCorrect="off"
                   ref={editorRef}
                   onInput={handleEditorInput}
                   placeholder="Write your letter here..."
