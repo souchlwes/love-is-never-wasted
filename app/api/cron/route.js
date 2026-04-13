@@ -33,6 +33,22 @@ export async function POST(request) {
 
       // 3. Mark as sent so we don't send it again
       await supabase.from('email_queue').update({ is_sent: true }).eq('id', item.id);
+
+      // 4. THE CLEANUP: Delete the photo from the storage bucket
+      if (item.image_url) {
+        // This splits the long URL by '/' and grabs the very last piece (the filename)
+        const fileName = item.image_url.split('/').pop();
+        
+        const { error: deleteError } = await supabase.storage
+          .from('email-attachments')
+          .remove([fileName]);
+
+        if (deleteError) {
+          console.error(`Failed to delete ${fileName}:`, deleteError.message);
+        } else {
+          console.log(`Successfully deleted ${fileName} from storage.`);
+        }
+      }
     }
 
     return NextResponse.json({ success: true, count: queue.length });
