@@ -48,6 +48,7 @@ body {
   background-color: #e0e0e0;
   box-shadow: 5px 5px #888888;
   position: relative;
+  overflow: hidden; /* Ensures contents don't bleed out */
 }
 
 /* Wider window for the letter preview */
@@ -76,6 +77,9 @@ body {
 
 .mac-content {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers the internal form */
   text-align: center;
   font-family: 'Chicago', monospace;
   transition: background-color 0.2s ease;
@@ -91,6 +95,7 @@ body {
    Forms & Inputs
    ========================================= */
 form {
+  width: 100%;
   text-align: left;
   font-size: 14px;
 }
@@ -101,7 +106,7 @@ label {
   font-weight: bold;
 }
 
-input, textarea {
+input, .rich-editor {
   width: 100%;
   padding: 8px;
   border: 2px solid black;
@@ -111,6 +116,9 @@ input, textarea {
   box-sizing: border-box;
 }
 
+/* =========================================
+   Tactile Button Styling
+   ========================================= */
 button {
   padding: 8px 16px;
   border: 3px solid black;
@@ -120,18 +128,24 @@ button {
   font-family: 'Chicago', monospace;
   font-size: 14px;
   margin-top: 10px;
+  transition: transform 0.05s, box-shadow 0.05s;
 }
 
-button:active {
+/* CLICKED/ACTIVE STATE: Changes shadows to look pushed in */
+button:active:not(:disabled) {
   box-shadow: inset 3px 3px #808080, inset -3px -3px #ffffff;
+  transform: translate(1px, 1px);
 }
 
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background: #cccccc;
+  box-shadow: inset 1px 1px #808080;
 }
 
 .send-button-container {
+  width: 100%;
   text-align: right;
   margin-top: 15px;
 }
@@ -169,16 +183,18 @@ button:disabled {
 }
 
 .zoomed-window {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  right: 10px !important;
+  bottom: 10px !important;
   max-width: none !important;
+  width: calc(100vw - 20px) !important;
   z-index: 9999;
   height: calc(100vh - 20px);
   display: flex;
   flex-direction: column;
+  transform: none !important; /* Overrides Draggable transform */
 }
 
 .zoomed-window .mac-content {
@@ -256,6 +272,7 @@ button:disabled {
 
 .pixel-button:active {
   box-shadow: inset 3px 3px #808080, inset -3px -3px #ffffff;
+  transform: scale(0.98);
 }
 
 .play-icon {
@@ -312,7 +329,6 @@ button:disabled {
    PDF Letter Preview (The Ink Bleed Effect)
    ========================================= */
 .letter-preview {
-  /* The letter itself gets the specific textured paper */
   background-image: url('/texturedpaper.jpg');
   background-size: cover;
   background-position: center;
@@ -340,20 +356,23 @@ button:disabled {
    ========================================= */
 @media (max-width: 768px) {
   .layout-container {
-    padding: 20px 15px; /* Softer margins for mobile */
+    padding: 20px 10px;
   }
 
   .mac-window {
-    box-shadow: 3px 3px #888888; /* Slightly flatter shadow for tight screens */
+    width: 95% !important;
+    margin: 0 auto;
+    box-shadow: 3px 3px #888888; 
   }
 
-  /* THE FIX FOR THE MOBILE ZOOM BUG: 
-   * iOS Safari auto-zooms if inputs are smaller than 16px. 
-   * Forcing 16px prevents the screen from jarringly jumping.
-   */
+  .mac-content {
+    padding: 15px;
+  }
+
+  /* FORCING 16px to prevent iOS auto-zoom */
   input, .rich-editor {
-    font-size: 16px; 
-    padding: 12px 8px; /* Better touch targets for mobile */
+    font-size: 16px !important; 
+    padding: 12px 8px; 
   }
 
   .letter-preview {
