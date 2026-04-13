@@ -6,22 +6,18 @@ export async function POST(request) {
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime, attachments = [];
 
-    // 1. SCENARIO A: QStash is waking the site up to send a delayed email
     if (contentType.includes('application/json')) {
       const body = await request.json();
       to = body.to;
       subject = body.subject;
       message = body.message;
-      
       if (body.attachmentName && body.attachmentBase64) {
          attachments.push({
            filename: body.attachmentName,
            content: Buffer.from(body.attachmentBase64, 'base64')
          });
       }
-      sendTime = null; // Force it to send right now
-      
-    // 2. SCENARIO B: A user is clicking "Send" on your website
+      sendTime = null;
     } else {
       const formData = await request.formData();
       to = formData.get('to');
@@ -35,7 +31,7 @@ export async function POST(request) {
         attachments.push({
           filename: file.name,
           content: buffer,
-          base64: buffer.toString('base64') // Save this to send to QStash
+          base64: buffer.toString('base64')
         });
       }
     }
@@ -48,7 +44,6 @@ export async function POST(request) {
       },
     });
 
-    // 3. EXECUTE: Send Immediately
     if (!sendTime) {
        await transporter.sendMail({
          from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
@@ -60,12 +55,20 @@ export async function POST(request) {
        });
        return NextResponse.json({ success: true, message: "Sent!" });
        
-    // 4. EXECUTE: Queue for the Future
     } else {
-       // Convert their chosen time into a Unix Timestamp for QStash
        const scheduledDate = new Date(sendTime);
-       const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
+       
+       if (scheduledDate < new Date()) {
+         await transporter.sendMail({
+           from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
+           to,
+           subject,
+           text: message,
+         });
+         return NextResponse.json({ success: true, message: "Sent immediately (time was in the past)!" });
+       }
 
+       const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
        const payload = {
          to,
          subject,
@@ -74,8 +77,8 @@ export async function POST(request) {
          attachmentBase64: attachments.length > 0 ? attachments[0].base64 : null
        };
 
-       // Tell QStash to call your live Vercel URL when the time comes!
-       const targetUrl = 'https://love-is-never-wasted-when-it-is-shared.vercel.app/api/send';
+       // ✅ YOUR UPDATED URL
+       const targetUrl = 'https://loveisneverwasted.vercel.app/api/send';
 
        const qstashResponse = await fetch(`https://qstash.upstash.io/v2/publish/${targetUrl}`, {
          method: 'POST',
@@ -87,13 +90,17 @@ export async function POST(request) {
          body: JSON.stringify(payload)
        });
 
-       if (!qstashResponse.ok) throw new Error("Failed to schedule");
+       if (!qstashResponse.ok) {
+         const errorText = await qstashResponse.text();
+         console.error("QStash Error Details:", errorText);
+         throw new Error(`QStash rejected: ${errorText}`);
+       }
 
-       return NextResponse.json({ success: true, message: "Queued for the future!" });
+       return NextResponse.json({ success: true, message: "Queued!" });
     }
 
   } catch (error) {
-    console.error("Email Error:", error);
-    return NextResponse.json({ success: false, error: "Failed to process request" }, { status: 500 });
+    console.error("Email Error:", error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
