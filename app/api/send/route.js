@@ -1,27 +1,25 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { Client } from "@upstash/qstash"; // ✅ Use the official tool
 
 export async function POST(request) {
   try {
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime, attachments = [];
 
-    // 1. SCENARIO A: QStash is waking the site up to send a delayed email
+    // 1. Handle incoming data (either from UI or from QStash "Wake up" call)
     if (contentType.includes('application/json')) {
       const body = await request.json();
       to = body.to;
       subject = body.subject;
       message = body.message;
-      
       if (body.attachmentName && body.attachmentBase64) {
          attachments.push({
            filename: body.attachmentName,
            content: Buffer.from(body.attachmentBase64, 'base64')
          });
       }
-      sendTime = null; // Force it to send right now
-      
-    // 2. SCENARIO B: A user is clicking "Send" on your website
+      sendTime = null; 
     } else {
       const formData = await request.formData();
       to = formData.get('to');
@@ -35,7 +33,7 @@ export async function POST(request) {
         attachments.push({
           filename: file.name,
           content: buffer,
-          base64: buffer.toString('base64') // Save this to send to QStash
+          base64: buffer.toString('base64')
         });
       }
     }
@@ -48,7 +46,7 @@ export async function POST(request) {
       },
     });
 
-    // 3. EXECUTE: Send Immediately
+    // 2. IMMEDIATE SEND
     if (!sendTime) {
        await transporter.sendMail({
          from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
@@ -60,40 +58,42 @@ export async function POST(request) {
        });
        return NextResponse.json({ success: true, message: "Sent!" });
        
-    // 4. EXECUTE: Queue for the Future
+    // 3. SCHEDULED SEND
     } else {
-       // Convert their chosen time into a Unix Timestamp for QStash
        const scheduledDate = new Date(sendTime);
-       const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
+       
+       // Safety: If time is already passed, send now
+       if (scheduledDate < new Date()) {
+         await transporter.sendMail({
+           from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
+           to,
+           subject,
+           text: message,
+         });
+         return NextResponse.json({ success: true, message: "Sent immediately!" });
+       }
 
-       const payload = {
-         to,
-         subject,
-         message,
-         attachmentName: attachments.length > 0 ? attachments[0].filename : null,
-         attachmentBase64: attachments.length > 0 ? attachments[0].base64 : null
-       };
+       // ✅ Use the Official Client
+       // .trim() fixes the "fetch failed" error caused by hidden spaces!
+       const qstash = new Client({ token: process.env.QSTASH_TOKEN?.trim() });
 
-       // Tell QStash to call your live Vercel URL when the time comes!
-       const targetUrl = 'https://love-is-never-wasted-when-it-is-shared.vercel.app/api/send';
-
-       const qstashResponse = await fetch(`https://qstash.upstash.io/v2/publish/${targetUrl}`, {
-         method: 'POST',
-         headers: {
-           'Authorization': `Bearer ${process.env.QSTASH_TOKEN}`,
-           'Content-Type': 'application/json',
-           'Upstash-Not-Before': unixTimestamp.toString()
+       await qstash.publishJSON({
+         url: `https://loveisneverwasted.vercel.app/api/send`,
+         body: {
+           to,
+           subject,
+           message,
+           attachmentName: attachments.length > 0 ? attachments[0].filename : null,
+           attachmentBase64: attachments.length > 0 ? attachments[0].base64 : null
          },
-         body: JSON.stringify(payload)
+         notBefore: Math.floor(scheduledDate.getTime() / 1000),
        });
 
-       if (!qstashResponse.ok) throw new Error("Failed to schedule");
-
-       return NextResponse.json({ success: true, message: "Queued for the future!" });
+       return NextResponse.json({ success: true, message: "Queued!" });
     }
 
   } catch (error) {
-    console.error("Email Error:", error);
-    return NextResponse.json({ success: false, error: "Failed to process request" }, { status: 500 });
+    console.error("FINAL ERROR LOG:", error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
