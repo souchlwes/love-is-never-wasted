@@ -30,9 +30,21 @@ export async function POST(request) {
        return NextResponse.json({ success: true, message: "Sent!" });
     }
 
+    // 1. Clean the token
     const cleanToken = (process.env.QSTASH_TOKEN || '').trim().replace(/[\n\r\t\s]/g, '');
+    
+    // 2. CALCULATE THE DELAY (The Fix)
     const scheduledDate = new Date(sendTime);
-    const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
+    const now = new Date();
+    
+    // Calculate how many seconds to wait
+    let delayInSeconds = Math.floor((scheduledDate.getTime() - now.getTime()) / 1000);
+
+    // If the delay is negative or too small, send it in 1 second
+    if (delayInSeconds < 0) delayInSeconds = 1;
+
+    console.log(`Scheduling delay: ${delayInSeconds} seconds`);
+
     const targetUrl = "https://loveisneverwasted.vercel.app/api/send";
     const postData = JSON.stringify({ to, subject, message });
 
@@ -41,13 +53,13 @@ export async function POST(request) {
         const options = {
           hostname: 'qstash-us-east-1.upstash.io',
           port: 443,
-          // ✅ CHANGED: Changed v1 to v2
           path: `/v2/publish/${targetUrl}`, 
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${cleanToken}`,
             'Content-Type': 'application/json',
-            'Upstash-Not-Before': unixTimestamp.toString(),
+            // ✅ CHANGED: We use Upstash-Delay instead of a specific timestamp
+            'Upstash-Delay': `${delayInSeconds}s`,
             'Content-Length': Buffer.byteLength(postData)
           }
         };
@@ -70,7 +82,7 @@ export async function POST(request) {
       });
     };
 
-    console.log("Calling Upstash v2 US-East-1...");
+    console.log("Calling Upstash with Delay logic...");
     await scheduleWithHttps();
 
     return NextResponse.json({ success: true, message: "Queued!" });
