@@ -29,22 +29,23 @@ export async function POST(request) {
        return NextResponse.json({ success: true, message: "Sent!" });
     }
 
-    // 1. Clean the token (this fixed the fetch error!)
+    // 1. Aggressive Token Cleaning
     const rawToken = process.env.QSTASH_TOKEN || '';
-    const cleanToken = rawToken.replace(/[\n\r\t\s]/g, ''); 
+    const cleanToken = rawToken.trim().replace(/[\n\r\t\s]/g, ''); 
 
     const scheduledDate = new Date(sendTime);
     const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
 
-    // 2. USE THE SPECIFIC US REGION URL
-    // This stops it from defaulting to Europe (eu-central-1)
-    const url = "https://qstash.us-east-1.upstash.io/v2/publish/https://loveisneverwasted.vercel.app/api/send";
+    // 2. THE STABLE METHOD: Use the base publish URL
+    // We tell QStash where to go using a HEADER instead of the URL path.
+    const url = "https://qstash.us-east-1.upstash.io/v2/publish";
 
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${cleanToken}`,
         "Content-Type": "application/json",
+        "Upstash-Forward-To": "https://loveisneverwasted.vercel.app/api/send",
         "Upstash-Not-Before": unixTimestamp.toString(),
       },
       body: JSON.stringify({ to, subject, message }),
