@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { Client } from "@upstash/qstash"; // ✅ Use the official tool
 
 export async function POST(request) {
   try {
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime, attachments = [];
 
-    // 1. SCENARIO A: QStash is waking the site up
+    // 1. Handle incoming data (either from UI or from QStash "Wake up" call)
     if (contentType.includes('application/json')) {
       const body = await request.json();
       to = body.to;
@@ -19,9 +20,7 @@ export async function POST(request) {
          });
       }
       sendTime = null; 
-    } 
-    // 2. SCENARIO B: A user is clicking "Send" on the site
-    else {
+    } else {
       const formData = await request.formData();
       to = formData.get('to');
       subject = formData.get('subject');
@@ -47,6 +46,7 @@ export async function POST(request) {
       },
     });
 
+    // 2. IMMEDIATE SEND
     if (!sendTime) {
        await transporter.sendMail({
          from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
@@ -58,10 +58,11 @@ export async function POST(request) {
        });
        return NextResponse.json({ success: true, message: "Sent!" });
        
+    // 3. SCHEDULED SEND
     } else {
        const scheduledDate = new Date(sendTime);
        
-       // Safety check: if time is in the past, send now
+       // Safety: If time is already passed, send now
        if (scheduledDate < new Date()) {
          await transporter.sendMail({
            from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
@@ -72,48 +73,27 @@ export async function POST(request) {
          return NextResponse.json({ success: true, message: "Sent immediately!" });
        }
 
-       const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
-       const payload = {
-         to,
-         subject,
-         message,
-         attachmentName: attachments.length > 0 ? attachments[0].filename : null,
-         attachmentBase64: attachments.length > 0 ? attachments[0].base64 : null
-       };
+       // ✅ Use the Official Client
+       // .trim() fixes the "fetch failed" error caused by hidden spaces!
+       const qstash = new Client({ token: process.env.QSTASH_TOKEN?.trim() });
 
-       // NEW: Check payload size (Upstash Free limit is 1MB)
-       const payloadSize = JSON.stringify(payload).length;
-       if (payloadSize > 1000000) {
-         throw new Error("Message or attachment is too large for scheduling (max 1MB).");
-       }
-
-       const targetUrl = 'https://loveisneverwasted.vercel.app/api/send';
-       
-       // ✅ FIX: Using encodeURIComponent ensures the URL is safe to send
-       const qstashEndpoint = `https://qstash.us-east-1.upstash.io/v2/publish/${encodeURIComponent(targetUrl)}`;
-
-       const qstashResponse = await fetch(qstashEndpoint, {
-         method: 'POST',
-         headers: {
-           'Authorization': `Bearer ${process.env.QSTASH_TOKEN}`,
-           'Content-Type': 'application/json',
-           'Upstash-Not-Before': unixTimestamp.toString()
+       await qstash.publishJSON({
+         url: `https://loveisneverwasted.vercel.app/api/send`,
+         body: {
+           to,
+           subject,
+           message,
+           attachmentName: attachments.length > 0 ? attachments[0].filename : null,
+           attachmentBase64: attachments.length > 0 ? attachments[0].base64 : null
          },
-         body: JSON.stringify(payload)
+         notBefore: Math.floor(scheduledDate.getTime() / 1000),
        });
-
-       if (!qstashResponse.ok) {
-         const errorText = await qstashResponse.text();
-         throw new Error(`QStash rejected: ${errorText}`);
-       }
 
        return NextResponse.json({ success: true, message: "Queued!" });
     }
 
   } catch (error) {
-    // Better logging for Vercel
-    console.error("DEBUG - Email Error Name:", error.name);
-    console.error("DEBUG - Email Error Message:", error.message);
+    console.error("FINAL ERROR LOG:", error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
