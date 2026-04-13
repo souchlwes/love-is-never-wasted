@@ -48,7 +48,6 @@ body {
   background-color: #e0e0e0;
   box-shadow: 5px 5px #888888;
   position: relative;
-  overflow: hidden; /* Ensures contents don't bleed out */
 }
 
 /* Wider window for the letter preview */
@@ -77,12 +76,12 @@ body {
 
 .mac-content {
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centers the internal form */
   text-align: center;
   font-family: 'Chicago', monospace;
   transition: background-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Drag and drop active state for file uploads */
@@ -106,7 +105,7 @@ label {
   font-weight: bold;
 }
 
-input, .rich-editor {
+input, textarea {
   width: 100%;
   padding: 8px;
   border: 2px solid black;
@@ -116,9 +115,12 @@ input, .rich-editor {
   box-sizing: border-box;
 }
 
-/* =========================================
-   Tactile Button Styling
-   ========================================= */
+/* Allows the user to drag and resize the message box vertically */
+textarea {
+  min-height: 100px;
+  resize: vertical; 
+}
+
 button {
   padding: 8px 16px;
   border: 3px solid black;
@@ -128,13 +130,13 @@ button {
   font-family: 'Chicago', monospace;
   font-size: 14px;
   margin-top: 10px;
-  transition: transform 0.05s, box-shadow 0.05s;
 }
 
-/* CLICKED/ACTIVE STATE: Changes shadows to look pushed in */
-button:active:not(:disabled) {
+/* CLICKED/ACTIVE STATE: Improved for tactile feel */
+button:active {
   box-shadow: inset 3px 3px #808080, inset -3px -3px #ffffff;
   transform: translate(1px, 1px);
+  background: #b0b0b0;
 }
 
 button:disabled {
@@ -194,7 +196,7 @@ button:disabled {
   height: calc(100vh - 20px);
   display: flex;
   flex-direction: column;
-  transform: none !important; /* Overrides Draggable transform */
+  transform: none !important;
 }
 
 .zoomed-window .mac-content {
@@ -229,6 +231,12 @@ button:disabled {
   margin: 0;
   padding: 4px 10px;
   box-shadow: inset -2px -2px #808080, inset 2px 2px #ffffff;
+}
+
+/* ✅ THE FIX: Toolbar button pressed look */
+.editor-toolbar button:active {
+  background: #b0b0b0;
+  box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
 }
 
 .rich-editor {
@@ -272,7 +280,6 @@ button:disabled {
 
 .pixel-button:active {
   box-shadow: inset 3px 3px #808080, inset -3px -3px #ffffff;
-  transform: scale(0.98);
 }
 
 .play-icon {
@@ -329,15 +336,22 @@ button:disabled {
    PDF Letter Preview (The Ink Bleed Effect)
    ========================================= */
 .letter-preview {
+  /* The letter itself gets the specific textured paper */
   background-image: url('/texturedpaper.jpg');
   background-size: cover;
   background-position: center;
   padding: 40px;
   border: 2px solid #000;
   text-align: left;
+  
   font-family: 'Typewriter', monospace; 
+  
   color: rgba(30, 30, 30, 0.95); 
-  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
+  
+  text-shadow: 
+    0px 0px 1px rgba(0, 0, 0, 0.5), 
+    0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
+    
   white-space: pre-wrap;
   font-size: 18px; 
   line-height: 1.6;
@@ -356,7 +370,7 @@ button:disabled {
    ========================================= */
 @media (max-width: 768px) {
   .layout-container {
-    padding: 20px 10px;
+    padding: 20px 15px; 
   }
 
   .mac-window {
@@ -365,11 +379,17 @@ button:disabled {
     box-shadow: 3px 3px #888888; 
   }
 
-  .mac-content {
-    padding: 15px;
+  /* ✅ THE FIX: Slimmer "Send At" box on mobile */
+  input[type="datetime-local"] {
+    font-size: 16px !important;
+    padding: 8px 10px !important;
+    height: 45px; 
   }
 
-  /* FORCING 16px to prevent iOS auto-zoom */
+  /* THE FIX FOR THE MOBILE ZOOM BUG: 
+   * iOS Safari auto-zooms if inputs are smaller than 16px. 
+   * Forcing 16px prevents the screen from jarringly jumping.
+   */
   input, .rich-editor {
     font-size: 16px !important; 
     padding: 12px 8px; 
