@@ -6,7 +6,7 @@ export async function POST(request) {
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime;
 
-    // 1. Get the data
+    // 1. Parse incoming data
     if (contentType.includes('application/json')) {
       const body = await request.json();
       to = body.to; subject = body.subject; message = body.message;
@@ -25,48 +25,48 @@ export async function POST(request) {
       },
     });
 
-    // 2. Immediate Send (Confirmation test)
+    // 2. Immediate Send (This is what Upstash triggers)
     if (!sendTime) {
-      await transporter.sendMail({
-        from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
-        to, subject, text: message,
-      });
-      return NextResponse.json({ success: true, message: "Sent!" });
+       console.log("Processing immediate send...");
+       await transporter.sendMail({
+         from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
+         to, subject, text: message,
+       });
+       return NextResponse.json({ success: true, message: "Sent!" });
     }
 
-    // 3. Scheduling (The fix is here)
+    // 3. Scheduling (This is where the site calls Upstash)
+    const token = (process.env.QSTASH_TOKEN || '').trim();
     const scheduledDate = new Date(sendTime);
     const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
-    
-    // Safety check for the token
-    const token = process.env.QSTASH_TOKEN?.trim();
-    if (!token) throw new Error("QSTASH_TOKEN is missing in Vercel Settings!");
 
-    // ✅ NEW APPROACH: We use the US-EAST-1 regional URL but WITHOUT encoding the destination.
-    // This is the most stable way to prevent "fetch failed" on Vercel.
-    const qstashUrl = `https://qstash.us-east-1.upstash.io/v2/publish/https://loveisneverwasted.vercel.app/api/send`;
+    console.log("Attempting to call Upstash...");
 
-    const response = await fetch(qstashUrl, {
-      method: 'POST',
+    // ✅ THE CLEANEST FETCH POSSIBLE
+    // We use the direct publish URL with NO extra encoding
+    const response = await fetch("https://qstash.us-east-1.upstash.io/v2/publish/https://loveisneverwasted.vercel.app/api/send", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Upstash-Not-Before': unixTimestamp.toString()
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Upstash-Not-Before": unixTimestamp.toString()
       },
       body: JSON.stringify({ to, subject, message })
     });
 
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error("Upstash Error:", errorData);
-      throw new Error(`Upstash rejected: ${errorData}`);
+      const errorText = await response.text();
+      console.error("Upstash Error Response:", errorText);
+      throw new Error(`Upstash said: ${errorText}`);
     }
+
+    const result = await response.json();
+    console.log("Upstash Success:", result);
 
     return NextResponse.json({ success: true, message: "Queued!" });
 
   } catch (error) {
     console.error("CRITICAL ERROR:", error.message);
-    // This will tell us if it's a network error or a code error
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
