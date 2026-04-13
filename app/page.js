@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import html2canvas from "html2canvas"; // ✅ Import the new image tool
+import html2canvas from "html2canvas"; 
 
 export default function MacMailer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -12,7 +12,7 @@ export default function MacMailer() {
   
   const audioRef = useRef(null);
   const formRef = useRef(null);
-  const letterRef = useRef(null); // ✅ Our "camera target" for the screenshot
+  const letterRef = useRef(null); 
 
   const toggleMusic = () => {
     if (isPlaying) {
@@ -42,11 +42,18 @@ export default function MacMailer() {
 
     const formData = new FormData(formRef.current);
     
+    // ✅ THE TIMEZONE FIX: Translates local time to UTC so Vercel understands it
+    const rawTime = formData.get('send_time');
+    if (rawTime) {
+      const universalTime = new Date(rawTime).toISOString();
+      formData.set('send_time', universalTime);
+    }
+    
     const letterData = {
       to: formData.get('to'),
       subject: formData.get('subject'),
       message: formData.get('message'),
-      sendTime: formData.get('send_time')
+      sendTime: formData.get('send_time') // Uses the updated universal time if scheduled
     };
     
     try {
@@ -80,18 +87,20 @@ export default function MacMailer() {
     }
   };
 
-  // ✅ The new function to generate and download the image
   const downloadImage = async () => {
     if (!letterRef.current) return;
     
-    // Optional: Show a toast so the user knows it's working
     showToast("Developing your letter..."); 
 
     try {
       const canvas = await html2canvas(letterRef.current, {
-        scale: 2, // Makes the image high-resolution so the text stays crisp
+        scale: 2, 
         useCORS: true, 
-        backgroundColor: null 
+        backgroundColor: null,
+        // ✅ THE BORDER FIX: Removes the black line ONLY in the screenshot
+        onclone: (document, element) => {
+          element.style.border = 'none';
+        }
       });
       
       const image = canvas.toDataURL("image/png");
@@ -113,7 +122,6 @@ export default function MacMailer() {
           <div className="mac-titlebar">Your Sent Letter</div>
           <div className="mac-content">
             
-            {/* ✅ We attach the letterRef right here so the camera knows what to snap */}
             <div className="letter-preview" ref={letterRef}>
               <div className="letter-header">
                 <div>To: {sentLetter.to}</div>
@@ -131,7 +139,6 @@ export default function MacMailer() {
 
             <div className="flex-between" style={{ marginTop: '20px' }}>
               <button onClick={() => setSentLetter(null)}>Write Another</button>
-              {/* ✅ Call the download function instead of printing */}
               <button onClick={downloadImage}>Save as Image</button>
             </div>
             
