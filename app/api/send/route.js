@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { Client } from "@upstash/qstash"; // ✅ Use the official tool
+import { Client } from "@upstash/qstash";
 
 export async function POST(request) {
   try {
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime, attachments = [];
 
-    // 1. Handle incoming data (either from UI or from QStash "Wake up" call)
     if (contentType.includes('application/json')) {
       const body = await request.json();
       to = body.to;
@@ -46,7 +45,6 @@ export async function POST(request) {
       },
     });
 
-    // 2. IMMEDIATE SEND
     if (!sendTime) {
        await transporter.sendMail({
          from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
@@ -58,11 +56,9 @@ export async function POST(request) {
        });
        return NextResponse.json({ success: true, message: "Sent!" });
        
-    // 3. SCHEDULED SEND
     } else {
        const scheduledDate = new Date(sendTime);
        
-       // Safety: If time is already passed, send now
        if (scheduledDate < new Date()) {
          await transporter.sendMail({
            from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
@@ -73,9 +69,11 @@ export async function POST(request) {
          return NextResponse.json({ success: true, message: "Sent immediately!" });
        }
 
-       // ✅ Use the Official Client
-       // .trim() fixes the "fetch failed" error caused by hidden spaces!
-       const qstash = new Client({ token: process.env.QSTASH_TOKEN?.trim() });
+       // ✅ UPDATED CLIENT FOR US REGION
+       const qstash = new Client({ 
+         token: process.env.QSTASH_TOKEN?.trim(),
+         baseUrl: "https://qstash.us-east-1.upstash.io" 
+       });
 
        await qstash.publishJSON({
          url: `https://loveisneverwasted.vercel.app/api/send`,
