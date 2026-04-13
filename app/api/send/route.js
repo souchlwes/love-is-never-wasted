@@ -4,6 +4,11 @@ import { Client } from "@upstash/qstash";
 
 export async function POST(request) {
   try {
+    // 1. Check for basic Environment Variables immediately
+    if (!process.env.QSTASH_TOKEN) {
+      throw new Error("MISSING_TOKEN: QSTASH_TOKEN is not defined in Vercel settings.");
+    }
+
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime, attachments = [];
 
@@ -48,7 +53,6 @@ export async function POST(request) {
     if (!sendTime) {
        await transporter.sendMail({
          from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
-         replyTo: 'do-not-reply@acoupleminutes.com',
          to,
          subject,
          text: message,
@@ -60,18 +64,14 @@ export async function POST(request) {
        const scheduledDate = new Date(sendTime);
        
        if (scheduledDate < new Date()) {
-         await transporter.sendMail({
-           from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
-           to,
-           subject,
-           text: message,
-         });
+         await transporter.sendMail({ from: `"love's never wasted" <${process.env.EMAIL_USER}>`, to, subject, text: message });
          return NextResponse.json({ success: true, message: "Sent immediately!" });
        }
 
-       // ✅ UPDATED CLIENT FOR US REGION
+       // ✅ Use the token directly with a safety trim
+       const token = process.env.QSTASH_TOKEN.trim();
        const qstash = new Client({ 
-         token: process.env.QSTASH_TOKEN?.trim(),
+         token: token,
          baseUrl: "https://qstash.us-east-1.upstash.io" 
        });
 
@@ -91,7 +91,13 @@ export async function POST(request) {
     }
 
   } catch (error) {
-    console.error("FINAL ERROR LOG:", error.message);
+    // This will help us see exactly what is failing in Vercel Logs
+    console.error("--- DEBUG START ---");
+    console.error("Error Name:", error.name);
+    console.error("Error Message:", error.message);
+    console.error("Token Present?:", !!process.env.QSTASH_TOKEN);
+    console.error("--- DEBUG END ---");
+    
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
