@@ -16,16 +16,21 @@ export default function MacMailer() {
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   
-  // NEW: State for the Zoom feature
   const [isZoomed, setIsZoomed] = useState(false);
 
   const [formValues, setFormValues] = useState({
     to: "", subject: "", message: "", send_time: ""
   });
 
+  // Original Refs
   const audioRef = useRef(null);
   const letterRef = useRef(null);
-  const editorRef = useRef(null); // NEW: Reference for the rich text editor
+  const editorRef = useRef(null); 
+
+  // ✅ THE FIX: New Refs for the Draggable windows
+  const sentWindowRef = useRef(null);
+  const notesWindowRef = useRef(null);
+  const musicWindowRef = useRef(null);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -37,7 +42,6 @@ export default function MacMailer() {
       try {
         const parsedDraft = JSON.parse(savedDraft);
         setFormValues(parsedDraft);
-        // Load the drafted message into the rich text editor
         if (editorRef.current && parsedDraft.message) {
           editorRef.current.innerHTML = parsedDraft.message;
         }
@@ -65,7 +69,6 @@ export default function MacMailer() {
     localStorage.setItem('macMailerDraft', JSON.stringify(newValues));
   };
 
-  // NEW: Handle Rich Text Formatting (Bold, Italic, Underline)
   const formatText = (command) => {
     document.execCommand(command, false, null);
     if (editorRef.current) {
@@ -74,7 +77,6 @@ export default function MacMailer() {
     }
   };
 
-  // NEW: Update state when typing in the rich text box
   const handleEditorInput = (e) => {
     handleInputChange({ target: { name: 'message', value: e.currentTarget.innerHTML } });
   };
@@ -108,7 +110,6 @@ export default function MacMailer() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Prevent sending if the rich editor is empty
     if (!formValues.message || formValues.message.trim() === "") {
         showToast("Please write a message first!");
         return;
@@ -145,7 +146,7 @@ export default function MacMailer() {
         setFormValues({ to: "", subject: "", message: "", send_time: "" });
         if (editorRef.current) editorRef.current.innerHTML = "";
         localStorage.removeItem('macMailerDraft'); 
-        setIsZoomed(false); // Close zoom on send
+        setIsZoomed(false); 
       } else showToast("Error sending message. Try again.");
     } catch (error) { showToast("Network error. Please try again."); } 
     finally { setIsSending(false); }
@@ -168,8 +169,10 @@ export default function MacMailer() {
     <main className="layout-container">
       
       {sentLetter ? (
-        <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed}>
-          <div className="mac-window wide">
+        // ✅ Added nodeRef here
+        <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={sentWindowRef}>
+          {/* ✅ Added ref here */}
+          <div className="mac-window wide" ref={sentWindowRef}>
             <div className="mac-titlebar draggable-handle">Your Sent Letter</div>
             <div className="mac-content">
               
@@ -183,7 +186,6 @@ export default function MacMailer() {
                       : new Date().toLocaleString('en-US', { hour12: true })}
                   </div>
                 </div>
-                {/* NEW: Render HTML safely in the preview */}
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
               </div>
 
@@ -196,10 +198,11 @@ export default function MacMailer() {
           </div>
         </Draggable>
       ) : (
-        <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed}>
-          <div className={`mac-window ${isZoomed ? 'zoomed-window' : ''}`}>
+        // ✅ Added nodeRef here
+        <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={notesWindowRef}>
+          {/* ✅ Added ref here */}
+          <div className={`mac-window ${isZoomed ? 'zoomed-window' : ''}`} ref={notesWindowRef}>
             
-            {/* NEW: Custom Titlebar with Mac OS Zoom button */}
             <div className="mac-titlebar flex-between draggable-handle">
               <span>Notes</span>
               <button 
@@ -223,14 +226,12 @@ export default function MacMailer() {
 
                 <label>Message:</label>
                 
-                {/* NEW: The Rich Text Toolbar */}
                 <div className="editor-toolbar">
                   <button type="button" onClick={() => formatText('bold')} style={{fontWeight: 'bold'}}>B</button>
                   <button type="button" onClick={() => formatText('italic')} style={{fontStyle: 'italic'}}>I</button>
                   <button type="button" onClick={() => formatText('underline')} style={{textDecoration: 'underline'}}>U</button>
                 </div>
                 
-                {/* NEW: The ContentEditable Editor */}
                 <div
                   className="rich-editor"
                   contentEditable
@@ -258,8 +259,10 @@ export default function MacMailer() {
         </Draggable>
       )}
 
-      <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed}>
-        <div className="mac-window">
+      {/* ✅ Added nodeRef here */}
+      <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={musicWindowRef}>
+        {/* ✅ Added ref here */}
+        <div className="mac-window" ref={musicWindowRef}>
           <div className="mac-titlebar draggable-handle">a couple minutes...</div>
           <div className="mac-content">
             <div className="pixel-button" onClick={toggleMusic}>
