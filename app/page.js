@@ -18,6 +18,13 @@ export default function MacMailer() {
   
   const [isZoomed, setIsZoomed] = useState(false);
 
+  // ✅ ADDED: State to track active formatting toggles
+  const [activeStyles, setActiveStyles] = useState({
+    bold: false,
+    italic: false,
+    underline: false
+  });
+
   const [formValues, setFormValues] = useState({
     to: "", subject: "", message: "", send_time: ""
   });
@@ -71,6 +78,13 @@ export default function MacMailer() {
 
   const formatText = (command) => {
     document.execCommand(command, false, null);
+    
+    // ✅ ADDED: Toggle the visual state of the button
+    setActiveStyles(prev => ({
+      ...prev,
+      [command]: !prev[command]
+    }));
+
     if (editorRef.current) {
       editorRef.current.focus();
       handleInputChange({ target: { name: 'message', value: editorRef.current.innerHTML } });
@@ -144,6 +158,10 @@ export default function MacMailer() {
         setSentLetter(letterData);
         setFileName(""); setFileObj(null);
         setFormValues({ to: "", subject: "", message: "", send_time: "" });
+        
+        // ✅ ADDED: Reset formatting states on send
+        setActiveStyles({ bold: false, italic: false, underline: false });
+        
         if (editorRef.current) editorRef.current.innerHTML = "";
         localStorage.removeItem('macMailerDraft'); 
         setIsZoomed(false); 
@@ -169,9 +187,7 @@ export default function MacMailer() {
     <main className="layout-container">
       
       {sentLetter ? (
-        // ✅ Added nodeRef here
         <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={sentWindowRef}>
-          {/* ✅ Added ref here */}
           <div className="mac-window wide" ref={sentWindowRef}>
             <div className="mac-titlebar draggable-handle">Your Sent Letter</div>
             <div className="mac-content">
@@ -198,9 +214,7 @@ export default function MacMailer() {
           </div>
         </Draggable>
       ) : (
-        // ✅ Added nodeRef here
         <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={notesWindowRef}>
-          {/* ✅ Added ref here */}
           <div className={`mac-window ${isZoomed ? 'zoomed-window' : ''}`} ref={notesWindowRef}>
             
             <div className="mac-titlebar flex-between draggable-handle">
@@ -227,15 +241,31 @@ export default function MacMailer() {
                 <label>Message:</label>
                 
                 <div className="editor-toolbar">
-                  <button type="button" onClick={() => formatText('bold')} style={{fontWeight: 'bold'}}>B</button>
-                  <button type="button" onClick={() => formatText('italic')} style={{fontStyle: 'italic'}}>I</button>
-                  <button type="button" onClick={() => formatText('underline')} style={{textDecoration: 'underline'}}>U</button>
+                  {/* ✅ UPDATED: Added active class conditionally */}
+                  <button 
+                    type="button" 
+                    onClick={() => formatText('bold')} 
+                    className={activeStyles.bold ? 'active' : ''}
+                    style={{fontWeight: 'bold'}}
+                  >B</button>
+                  <button 
+                    type="button" 
+                    onClick={() => formatText('italic')} 
+                    className={activeStyles.italic ? 'active' : ''}
+                    style={{fontStyle: 'italic'}}
+                  >I</button>
+                  <button 
+                    type="button" 
+                    onClick={() => formatText('underline')} 
+                    className={activeStyles.underline ? 'active' : ''}
+                    style={{textDecoration: 'underline'}}
+                  >U</button>
                 </div>
                 
                 <div
                   className="rich-editor"
                   contentEditable
-                  spellCheck="false" // ✅ Fixes the "cross mark" issue
+                  spellCheck="false" 
                   autoCorrect="off"
                   ref={editorRef}
                   onInput={handleEditorInput}
@@ -261,9 +291,7 @@ export default function MacMailer() {
         </Draggable>
       )}
 
-      {/* ✅ Added nodeRef here */}
       <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={musicWindowRef}>
-        {/* ✅ Added ref here */}
         <div className="mac-window" ref={musicWindowRef}>
           <div className="mac-titlebar draggable-handle">a couple minutes...</div>
           <div className="mac-content">
