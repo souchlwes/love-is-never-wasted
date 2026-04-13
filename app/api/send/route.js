@@ -6,7 +6,7 @@ export async function POST(request) {
     const contentType = request.headers.get('content-type') || '';
     let to, subject, message, sendTime;
 
-    // 1. Data Parsing
+    // 1. Get the data
     if (contentType.includes('application/json')) {
       const body = await request.json();
       to = body.to; subject = body.subject; message = body.message;
@@ -19,41 +19,34 @@ export async function POST(request) {
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
     });
 
-    // 2. Immediate Send Logic
+    // 2. Immediate Send (Confirmation test)
     if (!sendTime) {
-       await transporter.sendMail({
-         from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
-         to, subject, text: message,
-       });
-       return NextResponse.json({ success: true, message: "Sent!" });
-    } 
+      await transporter.sendMail({
+        from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
+        to, subject, text: message,
+      });
+      return NextResponse.json({ success: true, message: "Sent!" });
+    }
 
-    // 3. Scheduling Logic (The Problem Area)
+    // 3. Scheduling (The fix is here)
     const scheduledDate = new Date(sendTime);
-    
-    // Safety check: Is the date valid?
-    if (isNaN(scheduledDate.getTime())) {
-      throw new Error("The time you picked is invalid.");
-    }
-
-    // Safety check: Is the token actually there?
-    const token = process.env.QSTASH_TOKEN?.trim();
-    if (!token) {
-      throw new Error("Vercel cannot see your QSTASH_TOKEN. Check your environment variables.");
-    }
-
     const unixTimestamp = Math.floor(scheduledDate.getTime() / 1000);
-    const targetUrl = 'https://loveisneverwasted.vercel.app/api/send';
     
-    console.log(`Attempting to schedule for: ${scheduledDate.toLocaleString()}`);
+    // Safety check for the token
+    const token = process.env.QSTASH_TOKEN?.trim();
+    if (!token) throw new Error("QSTASH_TOKEN is missing in Vercel Settings!");
 
-    // We are using the US-East-1 region specifically
-    const qstashEndpoint = `https://qstash.us-east-1.upstash.io/v2/publish/${encodeURIComponent(targetUrl)}`;
+    // ✅ NEW APPROACH: We use the US-EAST-1 regional URL but WITHOUT encoding the destination.
+    // This is the most stable way to prevent "fetch failed" on Vercel.
+    const qstashUrl = `https://qstash.us-east-1.upstash.io/v2/publish/https://loveisneverwasted.vercel.app/api/send`;
 
-    const response = await fetch(qstashEndpoint, {
+    const response = await fetch(qstashUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -64,15 +57,16 @@ export async function POST(request) {
     });
 
     if (!response.ok) {
-      const errorBody = await response.text();
-      console.error("QStash Rejected Us:", errorBody);
-      throw new Error(`QStash Error: ${errorBody}`);
+      const errorData = await response.text();
+      console.error("Upstash Error:", errorData);
+      throw new Error(`Upstash rejected: ${errorData}`);
     }
 
     return NextResponse.json({ success: true, message: "Queued!" });
 
   } catch (error) {
-    console.error("LOGGED ERROR:", error.message);
+    console.error("CRITICAL ERROR:", error.message);
+    // This will tell us if it's a network error or a code error
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
