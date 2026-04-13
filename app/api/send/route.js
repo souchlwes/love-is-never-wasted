@@ -77,10 +77,10 @@ export async function POST(request) {
          attachmentBase64: attachments.length > 0 ? attachments[0].base64 : null
        };
 
-       // ✅ YOUR UPDATED URL
        const targetUrl = 'https://loveisneverwasted.vercel.app/api/send';
 
-       const qstashResponse = await fetch(`https://qstash.upstash.io/v2/publish/${targetUrl}`, {
+       // ✅ UPDATED: Added ".us-east-1" to the URL
+       const qstashResponse = await fetch(`https://qstash.us-east-1.upstash.io/v2/publish/${targetUrl}`, {
          method: 'POST',
          headers: {
            'Authorization': `Bearer ${process.env.QSTASH_TOKEN}`,
