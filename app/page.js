@@ -24,8 +24,17 @@ export default function MacMailer() {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files.length > 0) {
-      setFileName(e.target.files[0].name);
+    const file = e.target.files[0];
+    
+    if (file) {
+      // Check if file is larger than 4.5 MB (4.5 * 1024 * 1024 bytes)
+      if (file.size > 4.5 * 1024 * 1024) {
+        showToast("File is too large! Please choose an image under 4.5MB.");
+        e.target.value = ""; // Clears the input
+        setFileName("");
+        return;
+      }
+      setFileName(file.name);
     } else {
       setFileName("");
     }
