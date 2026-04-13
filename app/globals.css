@@ -35,14 +35,19 @@ body {
   gap: 30px; 
   width: 100%;
   padding: 40px 20px;
+  box-sizing: border-box;
 }
 
+/* =========================================
+   Mac Window Base Styling
+   ========================================= */
 .mac-window {
   border: 3px solid black;
   width: 100%;
   max-width: 400px;
   background-color: #e0e0e0;
   box-shadow: 5px 5px #888888;
+  position: relative;
 }
 
 /* Wider window for the letter preview */
@@ -52,19 +57,39 @@ body {
 
 .mac-titlebar {
   background-color: #c0c0c0;
-  padding: 5px;
+  padding: 5px 10px;
   border-bottom: 2px solid black;
   text-align: left;
   font-family: 'Chicago', monospace; 
   font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* Shows users the top bar is draggable on desktop */
+.draggable-handle {
+  cursor: grab;
+}
+.draggable-handle:active {
+  cursor: grabbing;
 }
 
 .mac-content {
   padding: 20px;
   text-align: center;
   font-family: 'Chicago', monospace;
+  transition: background-color 0.2s ease;
 }
 
+/* Drag and drop active state for file uploads */
+.drop-zone.dragging {
+  background-color: #d0d0d0;
+  box-shadow: inset 0px 0px 10px rgba(0,0,0,0.2);
+}
+
+/* =========================================
+   Forms & Inputs
+   ========================================= */
 form {
   text-align: left;
   font-size: 14px;
@@ -78,18 +103,12 @@ label {
 
 input, textarea {
   width: 100%;
-  padding: 6px;
+  padding: 8px;
   border: 2px solid black;
   background: #fff;
   font-family: 'Chicago', monospace;
   font-size: 14px;
   box-sizing: border-box;
-}
-
-/* Allows the user to drag and resize the message box vertically */
-textarea {
-  min-height: 100px;
-  resize: vertical; 
 }
 
 button {
@@ -107,6 +126,121 @@ button:active {
   box-shadow: inset 3px 3px #808080, inset -3px -3px #ffffff;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.send-button-container {
+  text-align: right;
+  margin-top: 15px;
+}
+
+.file-name-display {
+  font-size: 14px;
+  font-family: 'Chicago', monospace;
+  margin-left: 10px;
+  word-break: break-all;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* =========================================
+   Rich Text Editor & Fullscreen Zoom
+   ========================================= */
+.mac-zoom-button {
+  width: 14px;
+  height: 14px;
+  border: 2px solid black;
+  background: white;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.mac-zoom-button:active {
+  background: black;
+  box-shadow: none;
+}
+
+.zoomed-window {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  max-width: none !important;
+  z-index: 9999;
+  height: calc(100vh - 20px);
+  display: flex;
+  flex-direction: column;
+}
+
+.zoomed-window .mac-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.zoomed-window form {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.zoomed-window .rich-editor {
+  flex-grow: 1;
+  min-height: 300px;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+  background: #c0c0c0;
+  border: 2px solid black;
+  border-bottom: none;
+  padding: 4px;
+}
+
+.editor-toolbar button {
+  margin: 0;
+  padding: 4px 10px;
+  box-shadow: inset -2px -2px #808080, inset 2px 2px #ffffff;
+}
+
+.rich-editor {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  border: 2px solid black;
+  background: #fff;
+  font-family: 'Chicago', monospace;
+  font-size: 14px;
+  box-sizing: border-box;
+  text-align: left;
+  overflow-y: auto;
+}
+
+.rich-editor:empty:before {
+  content: attr(placeholder);
+  color: #888;
+  pointer-events: none;
+}
+
+.rich-editor:focus {
+  outline: none;
+}
+
+/* =========================================
+   Music Player & Pixel Icons
+   ========================================= */
 .pixel-button {
   display: flex;
   align-items: center;
@@ -145,7 +279,9 @@ button:active {
   background: black;
 }
 
-/* Toast Notification Styles */
+/* =========================================
+   Toast Notifications
+   ========================================= */
 .toast-container {
   position: fixed;
   bottom: 20px;
@@ -160,22 +296,16 @@ button:active {
   font-weight: bold;
   z-index: 1000;
   animation: slideUp 0.3s ease-out;
+  cursor: grab;
+}
+
+.toast-container:active {
+  cursor: grabbing;
 }
 
 @keyframes slideUp {
   from { bottom: -50px; opacity: 0; }
   to { bottom: 20px; opacity: 1; }
-}
-
-.file-name-display {
-  font-size: 14px;
-  font-family: 'Chicago', monospace;
-  margin-left: 10px;
-}
-
-.send-button-container {
-  text-align: right;
-  margin-top: 15px;
 }
 
 /* =========================================
@@ -189,15 +319,9 @@ button:active {
   padding: 40px;
   border: 2px solid #000;
   text-align: left;
-  
   font-family: 'Typewriter', monospace; 
-  
   color: rgba(30, 30, 30, 0.95); 
-  
-  text-shadow: 
-    0px 0px 1px rgba(0, 0, 0, 0.5), 
-    0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
-    
+  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
   white-space: pre-wrap;
   font-size: 18px; 
   line-height: 1.6;
@@ -211,9 +335,29 @@ button:active {
   font-weight: bold;
 }
 
-.flex-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
+/* =========================================
+   Mobile Optimization / Responsive Layout
+   ========================================= */
+@media (max-width: 768px) {
+  .layout-container {
+    padding: 20px 15px; /* Softer margins for mobile */
+  }
+
+  .mac-window {
+    box-shadow: 3px 3px #888888; /* Slightly flatter shadow for tight screens */
+  }
+
+  /* THE FIX FOR THE MOBILE ZOOM BUG: 
+   * iOS Safari auto-zooms if inputs are smaller than 16px. 
+   * Forcing 16px prevents the screen from jarringly jumping.
+   */
+  input, .rich-editor {
+    font-size: 16px; 
+    padding: 12px 8px; /* Better touch targets for mobile */
+  }
+
+  .letter-preview {
+    padding: 20px; 
+    font-size: 16px; 
+  }
 }
