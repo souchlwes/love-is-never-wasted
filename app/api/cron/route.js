@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-export async function GET(request) {
+export async function POST(request) {
   try {
     // 1. Find emails ready to be sent
     const { data: queue, error } = await supabase
