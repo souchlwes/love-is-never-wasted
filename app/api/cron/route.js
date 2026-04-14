@@ -27,7 +27,7 @@ export async function POST(request) {
         from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
         to: item.recipient_email,
         subject: item.subject,
-        text: item.message_body,
+        html: item.message_body, // ✅ THE FIX: Changed 'text' to 'html' so formatting works!
         attachments: item.image_url ? [{ path: item.image_url }] : []
       });
 
