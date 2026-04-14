@@ -1,3 +1,6 @@
+/* ✅ IMPORTS THE REAL DOTTED RECEIPT FONT */
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
 @font-face {
   font-family: 'TheSignature';
   src: url('/thesignature.ttf') format('truetype');
@@ -358,14 +361,12 @@ button:disabled {
 /* =========================================
    Paper Format Toggles & Base Preview
    ========================================= */
-   
-/* ✅ THE FIX: Custom Retro Dropdown Wrapper */
+/* Forces iOS Safari to render the select dropdown correctly */
 .retro-select-wrapper {
   position: relative;
   display: inline-block;
 }
 
-/* Adds the pixelated triangle over the default browser arrow */
 .retro-select-wrapper::after {
   content: '▼';
   position: absolute;
@@ -374,20 +375,19 @@ button:disabled {
   transform: translateY(-50%);
   font-family: 'Chicago', monospace;
   font-size: 10px;
-  pointer-events: none; /* Allows you to click "through" it */
+  pointer-events: none; 
   color: black;
 }
 
-/* Styles the dropdown exactly like the retro Mac buttons */
 .format-selector {
   width: 100%;
-  padding: 8px 30px 8px 10px; /* Extra padding on right so text doesn't hit the arrow */
+  padding: 8px 30px 8px 10px; 
   border: 3px solid black;
   background: #d0d0d0;
   box-shadow: inset 2px 2px #ffffff, inset -2px -2px #808080;
   -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none; /* Hides the ugly browser arrow */
+  appearance: none; 
   font-family: 'Chicago', monospace;
   font-size: 14px;
   cursor: pointer;
@@ -435,27 +435,67 @@ button:disabled {
   font-size: 18px; 
 }
 
-/* 🧾 RECEIPT FORMAT: Realistic Thermal Paper Fix */
+/* =========================================
+   🧾 RECEIPT FORMAT: Realistic Thermal Texture
+   ========================================= */
 .letter-preview.receipt {
-  /* Off-white/gray thermal paper color, completely overrides textured paper */
-  background: #e4e6e3; 
-  background-image: none; 
+  /* Creates a textured, gritty off-white thermal paper look */
+  background-color: #e4e6e3;
+  background-image: 
+    linear-gradient(90deg, rgba(200,200,200,0.15) 1px, transparent 1px), 
+    linear-gradient(rgba(200,200,200,0.15) 1px, transparent 1px);
+  background-size: 4px 4px;
   
   max-width: 380px;
   padding: 40px 30px;
   
-  /* Forces the dot-matrix/cash register aesthetic */
-  font-family: 'Courier New', Courier, monospace; 
-  font-size: 15px; 
+  /* ✅ THE FIX: USES THE NEW IMPORTED DOTTED MATRIX FONT */
+  font-family: 'DotGothic16', monospace; 
+  font-size: 18px; 
   text-transform: uppercase; 
-  letter-spacing: 0.5px;
-  line-height: 1.8;
+  letter-spacing: 1px;
+  line-height: 1.6;
   white-space: pre-wrap;
   
-  /* Creates a horizontal 'ink bleed' shadow to mimic a dot-matrix printer */
-  color: #333;
-  text-shadow: 0.5px 0px 0px rgba(0,0,0,0.3), -0.5px 0px 0px rgba(0,0,0,0.3);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.05); /* Flat paper, minimal internal shadow */
+  color: #222;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05); 
+}
+
+/* The Bold, Dotted Receipt Header */
+.receipt-top-banner {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.receipt-catchphrase {
+  font-family: 'DotGothic16', monospace;
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #111;
+}
+
+/* Realistic CSS Barcode Generator */
+.receipt-barcode {
+  width: 100%;
+  height: 40px;
+  margin: 15px 0;
+  opacity: 0.85; /* Slight thermal fade */
+  background: repeating-linear-gradient(
+    to right,
+    #111,
+    #111 2px,
+    transparent 2px,
+    transparent 4px,
+    #111 4px,
+    #111 5px,
+    transparent 5px,
+    transparent 8px,
+    #111 8px,
+    #111 12px,
+    transparent 12px,
+    transparent 14px
+  );
 }
 
 /* =========================================
