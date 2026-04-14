@@ -18,23 +18,25 @@ export default function MacMailer() {
   
   const [isZoomed, setIsZoomed] = useState(false);
 
-  // ✅ ADDED: State to track active formatting toggles
+  // ✅ UPDATED: Added alignment trackers to the state
   const [activeStyles, setActiveStyles] = useState({
     bold: false,
     italic: false,
-    underline: false
+    underline: false,
+    justifyLeft: true,
+    justifyCenter: false,
+    justifyRight: false,
+    justifyFull: false
   });
 
   const [formValues, setFormValues] = useState({
     to: "", subject: "", message: "", send_time: ""
   });
 
-  // Original Refs
   const audioRef = useRef(null);
   const letterRef = useRef(null);
   const editorRef = useRef(null); 
 
-  // ✅ THE FIX: New Refs for the Draggable windows
   const sentWindowRef = useRef(null);
   const notesWindowRef = useRef(null);
   const musicWindowRef = useRef(null);
@@ -76,14 +78,31 @@ export default function MacMailer() {
     localStorage.setItem('macMailerDraft', JSON.stringify(newValues));
   };
 
+  // ✅ THE PASTE FIX: Strips copied fonts and keeps it retro plain text
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const text = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
+    document.execCommand("insertText", false, text);
+  };
+
   const formatText = (command) => {
     document.execCommand(command, false, null);
     
-    // ✅ ADDED: Toggle the visual state of the button
-    setActiveStyles(prev => ({
-      ...prev,
-      [command]: !prev[command]
-    }));
+    // ✅ UPDATED: Logic to handle mutually exclusive alignment buttons
+    if (['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'].includes(command)) {
+      setActiveStyles(prev => ({
+        ...prev,
+        justifyLeft: command === 'justifyLeft',
+        justifyCenter: command === 'justifyCenter',
+        justifyRight: command === 'justifyRight',
+        justifyFull: command === 'justifyFull',
+      }));
+    } else {
+      setActiveStyles(prev => ({
+        ...prev,
+        [command]: !prev[command]
+      }));
+    }
 
     if (editorRef.current) {
       editorRef.current.focus();
@@ -159,8 +178,7 @@ export default function MacMailer() {
         setFileName(""); setFileObj(null);
         setFormValues({ to: "", subject: "", message: "", send_time: "" });
         
-        // ✅ ADDED: Reset formatting states on send
-        setActiveStyles({ bold: false, italic: false, underline: false });
+        setActiveStyles({ bold: false, italic: false, underline: false, justifyLeft: true, justifyCenter: false, justifyRight: false, justifyFull: false });
         
         if (editorRef.current) editorRef.current.innerHTML = "";
         localStorage.removeItem('macMailerDraft'); 
@@ -176,7 +194,11 @@ export default function MacMailer() {
     try {
       const canvas = await html2canvas(letterRef.current, {
         scale: 2, useCORS: true, backgroundColor: null,
-        onclone: (document, element) => { element.style.border = 'none'; }
+        onclone: (document, element) => { 
+          element.style.border = 'none'; 
+          // ✅ THE GRAY BAR FIX: Temporarily hides the shadow while taking the photo
+          element.style.boxShadow = 'none';
+        }
       });
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a"); link.href = image; link.download = "loves-never-wasted.png"; link.click();
@@ -241,25 +263,17 @@ export default function MacMailer() {
                 <label>Message:</label>
                 
                 <div className="editor-toolbar">
-                  {/* ✅ UPDATED: Added active class conditionally */}
-                  <button 
-                    type="button" 
-                    onClick={() => formatText('bold')} 
-                    className={activeStyles.bold ? 'active' : ''}
-                    style={{fontWeight: 'bold'}}
-                  >B</button>
-                  <button 
-                    type="button" 
-                    onClick={() => formatText('italic')} 
-                    className={activeStyles.italic ? 'active' : ''}
-                    style={{fontStyle: 'italic'}}
-                  >I</button>
-                  <button 
-                    type="button" 
-                    onClick={() => formatText('underline')} 
-                    className={activeStyles.underline ? 'active' : ''}
-                    style={{textDecoration: 'underline'}}
-                  >U</button>
+                  <button type="button" onClick={() => formatText('bold')} className={activeStyles.bold ? 'active' : ''} style={{fontWeight: 'bold'}}>B</button>
+                  <button type="button" onClick={() => formatText('italic')} className={activeStyles.italic ? 'active' : ''} style={{fontStyle: 'italic'}}>I</button>
+                  <button type="button" onClick={() => formatText('underline')} className={activeStyles.underline ? 'active' : ''} style={{textDecoration: 'underline'}}>U</button>
+                  
+                  {/* ✅ THE ALIGNMENT TOOLS */}
+                  <div className="toolbar-divider"></div>
+                  
+                  <button type="button" onClick={() => formatText('justifyLeft')} className={activeStyles.justifyLeft ? 'active' : ''}>Left</button>
+                  <button type="button" onClick={() => formatText('justifyCenter')} className={activeStyles.justifyCenter ? 'active' : ''}>Center</button>
+                  <button type="button" onClick={() => formatText('justifyRight')} className={activeStyles.justifyRight ? 'active' : ''}>Right</button>
+                  <button type="button" onClick={() => formatText('justifyFull')} className={activeStyles.justifyFull ? 'active' : ''}>Justify</button>
                 </div>
                 
                 <div
@@ -267,6 +281,7 @@ export default function MacMailer() {
                   contentEditable
                   spellCheck="false" 
                   autoCorrect="off"
+                  onPaste={handlePaste} // ✅ ATTACHED PASTE FIX
                   ref={editorRef}
                   onInput={handleEditorInput}
                   placeholder="Write your letter here..."
