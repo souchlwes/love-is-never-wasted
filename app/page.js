@@ -18,7 +18,7 @@ export default function MacMailer() {
   
   const [isZoomed, setIsZoomed] = useState(false);
 
-  // Track the chosen paper format BEFORE sending
+  // Track the chosen paper format
   const [paperFormat, setPaperFormat] = useState("receipt");
 
   // Track active formatting toggles
@@ -229,8 +229,22 @@ export default function MacMailer() {
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
               </div>
 
-              <div className="flex-between" style={{ marginTop: '20px' }}>
+              {/* ✅ THE FIX: The dropdown is now right here on the Preview Screen! */}
+              <div className="flex-between" style={{ marginTop: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <button onClick={() => setSentLetter(null)}>Write Another</button>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <label style={{ fontWeight: 'bold', margin: 0 }}>Format:</label>
+                  <select 
+                    className="format-selector"
+                    value={paperFormat} 
+                    onChange={(e) => setPaperFormat(e.target.value)}
+                  >
+                    <option value="receipt">Receipt (Narrow)</option>
+                    <option value="letter">US Letter (Wide)</option>
+                  </select>
+                </div>
+
                 <button onClick={downloadImage}>Save as Image</button>
               </div>
               
@@ -287,18 +301,6 @@ export default function MacMailer() {
                   onInput={handleEditorInput}
                   placeholder="Write your letter here..."
                 ></div>
-
-                {/* ✅ THE FIX: Format selector moved to the main form */}
-                <label htmlFor="paperFormat">Image Format:</label>
-                <select 
-                  id="paperFormat"
-                  className="format-selector"
-                  value={paperFormat} 
-                  onChange={(e) => setPaperFormat(e.target.value)}
-                >
-                  <option value="receipt">Receipt (Narrow)</option>
-                  <option value="letter">US Letter (Wide)</option>
-                </select>
 
                 <label htmlFor="send_time">Send At (optional):</label>
                 <input type="datetime-local" id="send_time" name="send_time" value={formValues.send_time} onChange={handleInputChange} />
