@@ -218,12 +218,6 @@ export default function MacMailer() {
               
               <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
                 
-                {paperFormat === 'receipt' && (
-                  <div className="receipt-top-banner">
-                    <div className="receipt-catchphrase">tu peux lacher prise</div>
-                  </div>
-                )}
-
                 <div className="letter-header">
                   <div>To: {sentLetter.to}</div>
                   <div>Subject: {sentLetter.subject}</div>
@@ -233,11 +227,13 @@ export default function MacMailer() {
                       : new Date().toLocaleString('en-US', { hour12: true })}
                   </div>
                 </div>
+                
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
 
+                {/* ✅ THE FIX: Catchphrase moved to the bottom, barcode removed completely */}
                 {paperFormat === 'receipt' && (
                   <div className="receipt-bottom-banner">
-                    <div className="receipt-barcode"></div>
+                    <div className="receipt-catchphrase">tu peux lacher prise</div>
                   </div>
                 )}
               </div>
