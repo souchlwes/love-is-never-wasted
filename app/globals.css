@@ -141,7 +141,7 @@ button:active {
   background: #b0b0b0;
 }
 
-/* Persists the pressed look when the style is active */
+/* ✅ THE FIX: Persists the pressed look when the style is active */
 button.active {
   background: #b0b0b0;
   box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
@@ -228,20 +228,12 @@ button:disabled {
 
 .editor-toolbar {
   display: flex;
-  flex-wrap: wrap; /* ✅ THE OVERFLOW FIX: Allows buttons to wrap to a new line on narrow screens */
   gap: 5px;
-  margin-bottom: 0; /* Ensures it sits flush on top of the text editor */
+  margin-bottom: 5px;
   background: #c0c0c0;
   border: 2px solid black;
   border-bottom: none;
   padding: 4px;
-}
-
-.toolbar-divider {
-  width: 2px;
-  background: #808080;
-  border-right: 1px solid #ffffff;
-  margin: 0 4px;
 }
 
 .editor-toolbar button {
@@ -397,22 +389,17 @@ button:disabled {
     box-shadow: 3px 3px #888888; 
   }
 
+  /* ✅ THE FIX: Slimmer "Send At" box on mobile */
   input[type="datetime-local"] {
     font-size: 16px !important;
-    padding: 8px 10px !important; 
-    min-height: 40px; 
-    height: auto !important; 
+    padding: 8px 10px !important; /* Fixed padding to match other fields */
+    min-height: 40px; /* Ensures touch targets are good without being "bloated" */
+    height: auto !important; /* Allows browser to determine height naturally */
   }
 
   input, .rich-editor {
     font-size: 16px !important; 
     padding: 12px 8px; 
-  }
-
-  /* ✅ THE OVERFLOW FIX: Shrinks the toolbar buttons slightly so they fit better on phones */
-  .editor-toolbar button {
-    padding: 4px 6px;
-    font-size: 12px;
   }
 
   .letter-preview {
