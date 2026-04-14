@@ -229,20 +229,22 @@ export default function MacMailer() {
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
               </div>
 
-              {/* ✅ THE FIX: The dropdown is now right here on the Preview Screen! */}
               <div className="flex-between" style={{ marginTop: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <button onClick={() => setSentLetter(null)}>Write Another</button>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <label style={{ fontWeight: 'bold', margin: 0 }}>Format:</label>
-                  <select 
-                    className="format-selector"
-                    value={paperFormat} 
-                    onChange={(e) => setPaperFormat(e.target.value)}
-                  >
-                    <option value="receipt">Receipt (Narrow)</option>
-                    <option value="letter">US Letter (Wide)</option>
-                  </select>
+                  {/* ✅ THE FIX: Wrapped the select in a custom div to style the arrow perfectly */}
+                  <div className="retro-select-wrapper">
+                    <select 
+                      className="format-selector"
+                      value={paperFormat} 
+                      onChange={(e) => setPaperFormat(e.target.value)}
+                    >
+                      <option value="receipt">Receipt (Narrow)</option>
+                      <option value="letter">US Letter (Wide)</option>
+                    </select>
+                  </div>
                 </div>
 
                 <button onClick={downloadImage}>Save as Image</button>
