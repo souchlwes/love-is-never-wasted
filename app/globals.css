@@ -358,42 +358,56 @@ button:disabled {
 /* =========================================
    Paper Format Toggles & Base Preview
    ========================================= */
-/* Forces iOS Safari to render the select dropdown correctly */
+   
+/* ✅ THE FIX: Custom Retro Dropdown Wrapper */
+.retro-select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Adds the pixelated triangle over the default browser arrow */
+.retro-select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-family: 'Chicago', monospace;
+  font-size: 10px;
+  pointer-events: none; /* Allows you to click "through" it */
+  color: black;
+}
+
+/* Styles the dropdown exactly like the retro Mac buttons */
 .format-selector {
   width: 100%;
-  padding: 8px;
-  border: 2px solid black;
-  background: #fff url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 10px top 50%;
-  background-size: 12px auto;
+  padding: 8px 30px 8px 10px; /* Extra padding on right so text doesn't hit the arrow */
+  border: 3px solid black;
+  background: #d0d0d0;
+  box-shadow: inset 2px 2px #ffffff, inset -2px -2px #808080;
   -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
+  appearance: none; /* Hides the ugly browser arrow */
   font-family: 'Chicago', monospace;
   font-size: 14px;
   cursor: pointer;
   box-sizing: border-box;
 }
 
+.format-selector:active {
+  background: #b0b0b0;
+  box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
+}
+
 /* Shared properties for both formats */
 .letter-preview {
-  background-image: url('/texturedpaper.jpg');
-  background-size: cover;
-  background-position: center;
   border: 2px solid #000;
   text-align: left;
-  font-family: 'Typewriter', monospace; 
-  color: rgba(30, 30, 30, 0.95); 
-  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
-  white-space: pre-wrap;
-  line-height: 1.6;
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
-  margin: 0 auto;
-  
-  /* ✅ THE CLUTTER FIX: Forces long text to stay inside the box */
   box-sizing: border-box;
   width: 100%;
   overflow-wrap: break-word;
   word-break: break-word;
+  margin: 0 auto;
 }
 
 .letter-header {
@@ -403,20 +417,45 @@ button:disabled {
   font-weight: bold;
 }
 
-/* 🧾 RECEIPT FORMAT: Narrow, long, tighter text */
-.letter-preview.receipt {
-  max-width: 380px;
-  padding: 40px 30px;
-  font-size: 16px; 
-}
-
-/* 📄 US LETTER FORMAT: Wider, standard proportions, larger margins */
+/* 📄 US LETTER FORMAT: Standard Typewriter Style */
 .letter-preview.letter {
+  background-image: url('/texturedpaper.jpg');
+  background-size: cover;
+  background-position: center;
+  font-family: 'Typewriter', monospace; 
+  color: rgba(30, 30, 30, 0.95); 
+  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
+  white-space: pre-wrap;
+  line-height: 1.6;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+  
   max-width: 800px;
-  /* ✅ THE CLUTTER FIX: Removed the massive 700px height so it naturally wraps your text */
   min-height: 300px; 
   padding: 60px; 
   font-size: 18px; 
+}
+
+/* 🧾 RECEIPT FORMAT: Realistic Thermal Paper Fix */
+.letter-preview.receipt {
+  /* Off-white/gray thermal paper color, completely overrides textured paper */
+  background: #e4e6e3; 
+  background-image: none; 
+  
+  max-width: 380px;
+  padding: 40px 30px;
+  
+  /* Forces the dot-matrix/cash register aesthetic */
+  font-family: 'Courier New', Courier, monospace; 
+  font-size: 15px; 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  
+  /* Creates a horizontal 'ink bleed' shadow to mimic a dot-matrix printer */
+  color: #333;
+  text-shadow: 0.5px 0px 0px rgba(0,0,0,0.3), -0.5px 0px 0px rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05); /* Flat paper, minimal internal shadow */
 }
 
 /* =========================================
