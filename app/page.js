@@ -217,6 +217,14 @@ export default function MacMailer() {
             <div className="mac-content">
               
               <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
+                
+                {paperFormat === 'receipt' && (
+                  <div className="receipt-top-banner">
+                    <div className="receipt-catchphrase">tu peux lacher prise</div>
+                    <div className="receipt-barcode"></div>
+                  </div>
+                )}
+
                 <div className="letter-header">
                   <div>To: {sentLetter.to}</div>
                   <div>Subject: {sentLetter.subject}</div>
@@ -234,7 +242,6 @@ export default function MacMailer() {
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <label style={{ fontWeight: 'bold', margin: 0 }}>Format:</label>
-                  {/* ✅ THE FIX: Wrapped the select in a custom div to style the arrow perfectly */}
                   <div className="retro-select-wrapper">
                     <select 
                       className="format-selector"
