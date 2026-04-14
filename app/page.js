@@ -218,10 +218,10 @@ export default function MacMailer() {
               
               <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
                 
+                {/* Header only for receipt */}
                 {paperFormat === 'receipt' && (
                   <div className="receipt-top-banner">
                     <div className="receipt-catchphrase">tu peux lacher prise</div>
-                    <div className="receipt-barcode"></div>
                   </div>
                 )}
 
@@ -235,6 +235,13 @@ export default function MacMailer() {
                   </div>
                 </div>
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
+
+                {/* ✅ Moved Barcode below the message body */}
+                {paperFormat === 'receipt' && (
+                  <div className="receipt-bottom-banner">
+                    <div className="receipt-barcode"></div>
+                  </div>
+                )}
               </div>
 
               <div className="flex-between" style={{ marginTop: '20px', flexWrap: 'wrap', gap: '10px' }}>
