@@ -141,7 +141,7 @@ button:active {
   background: #b0b0b0;
 }
 
-/* ✅ THE FIX: Persists the pressed look when the style is active */
+/* Persists the pressed look when the style is active */
 button.active {
   background: #b0b0b0;
   box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
@@ -234,6 +234,14 @@ button:disabled {
   border: 2px solid black;
   border-bottom: none;
   padding: 4px;
+}
+
+/* ✅ NEW: Retro divider for the toolbar */
+.toolbar-divider {
+  width: 2px;
+  background: #808080;
+  border-right: 1px solid #ffffff;
+  margin: 0 4px;
 }
 
 .editor-toolbar button {
@@ -389,12 +397,11 @@ button:disabled {
     box-shadow: 3px 3px #888888; 
   }
 
-  /* ✅ THE FIX: Slimmer "Send At" box on mobile */
   input[type="datetime-local"] {
     font-size: 16px !important;
-    padding: 8px 10px !important; /* Fixed padding to match other fields */
-    min-height: 40px; /* Ensures touch targets are good without being "bloated" */
-    height: auto !important; /* Allows browser to determine height naturally */
+    padding: 8px 10px !important; 
+    min-height: 40px; 
+    height: auto !important; 
   }
 
   input, .rich-editor {
