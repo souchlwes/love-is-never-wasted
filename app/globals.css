@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
-
 @font-face {
   font-family: 'TheSignature';
   src: url('/thesignature.ttf') format('truetype');
@@ -13,6 +11,12 @@
 @font-face {
   font-family: 'Typewriter';
   src: url('/typewriter.ttf') format('truetype');
+}
+
+/* ✅ Local Receipt Font loaded */
+@font-face {
+  font-family: 'Receipt';
+  src: url('/receipt.ttf') format('truetype');
 }
 
 body {
@@ -438,8 +442,8 @@ button:disabled {
    🧾 RECEIPT FORMAT: Realistic Thermal Texture
    ========================================= */
 .letter-preview.receipt {
-  /* ✅ THE FIX: Brought back your custom textured paper background */
-  background-image: url('/texturedpaper.jpg');
+  /* ✅ THE FIX: Implemented receipts.jpg for the background */
+  background-image: url('/receipts.jpg');
   background-size: cover;
   background-position: center;
   background-color: transparent;
@@ -447,15 +451,15 @@ button:disabled {
   max-width: 380px;
   padding: 40px 30px;
   
-  /* Uses the DotGothic16 Font */
-  font-family: 'DotGothic16', monospace; 
-  font-size: 18px; 
+  /* Uses your downloaded receipt.ttf */
+  font-family: 'Receipt', monospace; 
+  font-size: 16px; 
   text-transform: uppercase; 
   letter-spacing: 1px;
   line-height: 1.6;
   white-space: pre-wrap;
   
-  /* ✅ THE FIX: The greyish-black text with organic bleeding applied to everything */
+  /* The greyish-black text with organic bleeding applied */
   color: #383838;
   text-shadow: 0.5px 0.5px 1.5px rgba(56, 56, 56, 0.6), -0.2px -0.2px 0px rgba(56, 56, 56, 0.2);
   
@@ -469,7 +473,7 @@ button:disabled {
 }
 
 .receipt-catchphrase {
-  /* ✅ THE FIX: Swapped back to Typewriter font for the header */
+  /* Uses Typewriter font for the header as requested */
   font-family: 'Typewriter', monospace;
   font-size: 24px;
   font-weight: bold;
@@ -494,10 +498,9 @@ button:disabled {
   margin: 0 auto;
   opacity: 0.8; 
   
-  /* ✅ THE FIX: Added a soft blur so it bleeds into the textured paper organically */
-  filter: blur(0.4px);
+  /* ✅ THE FIX: Removed the blur filter that was causing html2canvas to pixelate */
   
-  /* Matches the exact greyish-black color of the font */
+  /* Uses the exact greyish-black color of the font */
   background: repeating-linear-gradient(
     to right,
     #383838,
