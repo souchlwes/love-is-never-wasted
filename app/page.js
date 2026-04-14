@@ -18,7 +18,10 @@ export default function MacMailer() {
   
   const [isZoomed, setIsZoomed] = useState(false);
 
-  // ✅ UPDATED: Added alignment trackers to the state
+  // Track the chosen paper format
+  const [paperFormat, setPaperFormat] = useState("receipt");
+
+  // Track active formatting toggles
   const [activeStyles, setActiveStyles] = useState({
     bold: false,
     italic: false,
@@ -78,7 +81,7 @@ export default function MacMailer() {
     localStorage.setItem('macMailerDraft', JSON.stringify(newValues));
   };
 
-  // ✅ THE PASTE FIX: Strips copied fonts and keeps it retro plain text
+  // Strips copied fonts and keeps it retro plain text
   const handlePaste = (e) => {
     e.preventDefault();
     const text = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
@@ -88,7 +91,7 @@ export default function MacMailer() {
   const formatText = (command) => {
     document.execCommand(command, false, null);
     
-    // ✅ UPDATED: Logic to handle mutually exclusive alignment buttons
+    // Logic to handle mutually exclusive alignment buttons
     if (['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'].includes(command)) {
       setActiveStyles(prev => ({
         ...prev,
@@ -196,7 +199,7 @@ export default function MacMailer() {
         scale: 2, useCORS: true, backgroundColor: null,
         onclone: (document, element) => { 
           element.style.border = 'none'; 
-          // ✅ THE GRAY BAR FIX: Temporarily hides the shadow while taking the photo
+          // Hides the shadow while taking the photo to prevent the gray bar
           element.style.boxShadow = 'none';
         }
       });
@@ -210,11 +213,11 @@ export default function MacMailer() {
       
       {sentLetter ? (
         <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={sentWindowRef}>
-          <div className="mac-window wide" ref={sentWindowRef}>
+          <div className={`mac-window ${paperFormat === 'letter' ? 'extra-wide' : 'wide'}`} ref={sentWindowRef}>
             <div className="mac-titlebar draggable-handle">Your Sent Letter</div>
             <div className="mac-content">
               
-              <div className="letter-preview" ref={letterRef}>
+              <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
                 <div className="letter-header">
                   <div>To: {sentLetter.to}</div>
                   <div>Subject: {sentLetter.subject}</div>
@@ -227,8 +230,18 @@ export default function MacMailer() {
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
               </div>
 
-              <div className="flex-between" style={{ marginTop: '20px' }}>
+              <div className="flex-between" style={{ marginTop: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <button onClick={() => setSentLetter(null)}>Write Another</button>
+                
+                <select 
+                  className="format-selector"
+                  value={paperFormat} 
+                  onChange={(e) => setPaperFormat(e.target.value)}
+                >
+                  <option value="receipt">Receipt Format</option>
+                  <option value="letter">US Letter Format</option>
+                </select>
+
                 <button onClick={downloadImage}>Save as Image</button>
               </div>
               
@@ -267,7 +280,6 @@ export default function MacMailer() {
                   <button type="button" onClick={() => formatText('italic')} className={activeStyles.italic ? 'active' : ''} style={{fontStyle: 'italic'}}>I</button>
                   <button type="button" onClick={() => formatText('underline')} className={activeStyles.underline ? 'active' : ''} style={{textDecoration: 'underline'}}>U</button>
                   
-                  {/* ✅ THE ALIGNMENT TOOLS */}
                   <div className="toolbar-divider"></div>
                   
                   <button type="button" onClick={() => formatText('justifyLeft')} className={activeStyles.justifyLeft ? 'active' : ''}>Left</button>
@@ -281,7 +293,7 @@ export default function MacMailer() {
                   contentEditable
                   spellCheck="false" 
                   autoCorrect="off"
-                  onPaste={handlePaste} // ✅ ATTACHED PASTE FIX
+                  onPaste={handlePaste}
                   ref={editorRef}
                   onInput={handleEditorInput}
                   placeholder="Write your letter here..."
