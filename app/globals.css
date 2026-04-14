@@ -1,4 +1,3 @@
-/* ✅ IMPORTS THE REAL DOTTED RECEIPT FONT */
 @import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
 
 @font-face {
@@ -439,13 +438,16 @@ button:disabled {
    🧾 RECEIPT FORMAT: Realistic Thermal Texture
    ========================================= */
 .letter-preview.receipt {
-  background-color: #f9f9f6;
-  background-image: none;
+  /* ✅ THE FIX: Brought back your custom textured paper background */
+  background-image: url('/texturedpaper.jpg');
+  background-size: cover;
+  background-position: center;
+  background-color: transparent;
   
   max-width: 380px;
   padding: 40px 30px;
   
-  /* ✅ Back to DotGothic16 */
+  /* Uses the DotGothic16 Font */
   font-family: 'DotGothic16', monospace; 
   font-size: 18px; 
   text-transform: uppercase; 
@@ -453,11 +455,11 @@ button:disabled {
   line-height: 1.6;
   white-space: pre-wrap;
   
-  /* ✅ Greyish-Black color to match the retro image perfectly */
+  /* ✅ THE FIX: The greyish-black text with organic bleeding applied to everything */
   color: #383838;
-  text-shadow: 0.5px 0.5px 0px rgba(56, 56, 56, 0.3);
+  text-shadow: 0.5px 0.5px 1.5px rgba(56, 56, 56, 0.6), -0.2px -0.2px 0px rgba(56, 56, 56, 0.2);
   
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.05); 
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.2); 
 }
 
 /* The Bold Receipt Header */
@@ -467,33 +469,35 @@ button:disabled {
 }
 
 .receipt-catchphrase {
-  /* ✅ Uses your signature font */
-  font-family: 'TheSignature', cursive;
-  font-size: 36px;
-  font-weight: normal;
-  text-transform: none;
+  /* ✅ THE FIX: Swapped back to Typewriter font for the header */
+  font-family: 'Typewriter', monospace;
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
   
-  /* Matches the greyish-black retro ink */
   color: #383838;
-  text-shadow: 0.5px 0.5px 0px rgba(56, 56, 56, 0.3);
+  text-shadow: 0.5px 0.5px 1.5px rgba(56, 56, 56, 0.6), -0.2px -0.2px 0px rgba(56, 56, 56, 0.2);
 }
 
 /* The Bottom Barcode Banner */
 .receipt-bottom-banner {
   text-align: center;
   margin-top: 30px;
-  border-top: 2px dashed rgba(56, 56, 56, 0.3); 
+  border-top: 2px dashed rgba(56, 56, 56, 0.4); 
   padding-top: 20px;
 }
 
 /* Realistic CSS Barcode Generator */
 .receipt-barcode {
   width: 100%;
-  height: 50px;
+  height: 45px;
   margin: 0 auto;
-  opacity: 0.85; 
+  opacity: 0.8; 
   
-  /* ✅ Removed blur to fix pixelation. Used the exact same greyish-black color */
+  /* ✅ THE FIX: Added a soft blur so it bleeds into the textured paper organically */
+  filter: blur(0.4px);
+  
+  /* Matches the exact greyish-black color of the font */
   background: repeating-linear-gradient(
     to right,
     #383838,
@@ -501,13 +505,13 @@ button:disabled {
     transparent 2px,
     transparent 4px,
     #383838 4px,
-    #383838 5px,
-    transparent 5px,
-    transparent 8px,
-    #383838 8px,
+    #383838 6px,
+    transparent 6px,
+    transparent 9px,
+    #383838 9px,
     #383838 12px,
     transparent 12px,
-    transparent 14px
+    transparent 15px
   );
 }
 
