@@ -1,3 +1,6 @@
+/* ✅ BRINGS BACK THE DOTGOTHIC16 FONT */
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
 @font-face {
   font-family: 'TheSignature';
   src: url('/thesignature.ttf') format('truetype');
@@ -11,12 +14,6 @@
 @font-face {
   font-family: 'Typewriter';
   src: url('/typewriter.ttf') format('truetype');
-}
-
-/* ✅ Local Receipt Font loaded */
-@font-face {
-  font-family: 'Receipt';
-  src: url('/receipt.ttf') format('truetype');
 }
 
 body {
@@ -439,31 +436,34 @@ button:disabled {
 }
 
 /* =========================================
-   🧾 RECEIPT FORMAT: Realistic Thermal Texture
+   🧾 RECEIPT FORMAT: Pure CSS Thermal Texture
    ========================================= */
 .letter-preview.receipt {
-  /* ✅ THE FIX: Implemented receipts.jpg for the background */
-  background-image: url('/receipts.jpg');
-  background-size: cover;
-  background-position: center;
-  background-color: transparent;
+  /* ✅ PURE CSS PAPER: Off-white thermal color with micro-dot texture */
+  background-color: #f6f7f2;
+  background-image: 
+    radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+    radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
   
   max-width: 380px;
   padding: 40px 30px;
   
-  /* Uses your downloaded receipt.ttf */
-  font-family: 'Receipt', monospace; 
-  font-size: 16px; 
+  /* ✅ USES THE DOTGOTHIC16 FONT */
+  font-family: 'DotGothic16', monospace; 
+  font-size: 18px; 
   text-transform: uppercase; 
   letter-spacing: 1px;
   line-height: 1.6;
   white-space: pre-wrap;
   
-  /* The greyish-black text with organic bleeding applied */
+  /* Matches the exact grayish-black ink from the picture */
   color: #383838;
   text-shadow: 0.5px 0.5px 1.5px rgba(56, 56, 56, 0.6), -0.2px -0.2px 0px rgba(56, 56, 56, 0.2);
   
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.2); 
+  /* Inner shadow mimics the natural curl of paper off the roll */
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.05), inset 15px 0 20px rgba(0,0,0,0.02), inset -15px 0 20px rgba(0,0,0,0.02); 
 }
 
 /* The Bold Receipt Header */
@@ -473,7 +473,7 @@ button:disabled {
 }
 
 .receipt-catchphrase {
-  /* Uses Typewriter font for the header as requested */
+  /* ✅ Uses Typewriter font for the header */
   font-family: 'Typewriter', monospace;
   font-size: 24px;
   font-weight: bold;
@@ -491,31 +491,23 @@ button:disabled {
   padding-top: 20px;
 }
 
-/* Realistic CSS Barcode Generator */
+/* ✅ THE FIX: Realistic, imperfect CSS barcode */
 .receipt-barcode {
   width: 100%;
   height: 45px;
   margin: 0 auto;
-  opacity: 0.8; 
+  opacity: 0.85; 
   
-  /* ✅ THE FIX: Removed the blur filter that was causing html2canvas to pixelate */
+  /* Uses 5 overlapping repeating gradients to create uneven, realistic stripe widths */
+  background: 
+    repeating-linear-gradient(to right, #383838, #383838 2px, transparent 2px, transparent 5px) 0 0 / 22% 100% no-repeat,
+    repeating-linear-gradient(to right, #383838, #383838 4px, transparent 4px, transparent 7px) 22% 0 / 20% 100% no-repeat,
+    repeating-linear-gradient(to right, #383838, #383838 1px, transparent 1px, transparent 3px) 42% 0 / 18% 100% no-repeat,
+    repeating-linear-gradient(to right, #383838, #383838 3px, transparent 3px, transparent 6px) 60% 0 / 25% 100% no-repeat,
+    repeating-linear-gradient(to right, #383838, #383838 2px, transparent 2px, transparent 4px) 85% 0 / 15% 100% no-repeat;
   
-  /* Uses the exact greyish-black color of the font */
-  background: repeating-linear-gradient(
-    to right,
-    #383838,
-    #383838 2px,
-    transparent 2px,
-    transparent 4px,
-    #383838 4px,
-    #383838 6px,
-    transparent 6px,
-    transparent 9px,
-    #383838 9px,
-    #383838 12px,
-    transparent 12px,
-    transparent 15px
-  );
+  /* Light drop-shadow mimics the bleeding ink so it doesn't look computer-generated */
+  box-shadow: 0px 0px 2px rgba(56, 56, 56, 0.4);
 }
 
 /* =========================================
