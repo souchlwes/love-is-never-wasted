@@ -228,15 +228,15 @@ button:disabled {
 
 .editor-toolbar {
   display: flex;
+  flex-wrap: wrap; /* ✅ THE OVERFLOW FIX: Allows buttons to wrap to a new line on narrow screens */
   gap: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 0; /* Ensures it sits flush on top of the text editor */
   background: #c0c0c0;
   border: 2px solid black;
   border-bottom: none;
   padding: 4px;
 }
 
-/* ✅ NEW: Retro divider for the toolbar */
 .toolbar-divider {
   width: 2px;
   background: #808080;
@@ -407,6 +407,12 @@ button:disabled {
   input, .rich-editor {
     font-size: 16px !important; 
     padding: 12px 8px; 
+  }
+
+  /* ✅ THE OVERFLOW FIX: Shrinks the toolbar buttons slightly so they fit better on phones */
+  .editor-toolbar button {
+    padding: 4px 6px;
+    font-size: 12px;
   }
 
   .letter-preview {
