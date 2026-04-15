@@ -28,7 +28,6 @@ export default function MacMailer() {
   const [isSending, setIsSending] = useState(false);
   const [sentLetter, setSentLetter] = useState(null);
   
-  // ✅ THE FIX: New state to perfectly strip the border during downloads
   const [isDownloading, setIsDownloading] = useState(false);
   
   const [isMobile, setIsMobile] = useState(false);
@@ -211,18 +210,15 @@ export default function MacMailer() {
   const downloadImage = async () => {
     if (!letterRef.current) return;
     
-    // Set downloading state to physically remove the border from the screen
     setIsDownloading(true);
-    showToast("Developing your letter... (Bypassing Safari Security)"); 
+    showToast("Developing your letter..."); 
 
     try {
-      // Give React a fraction of a second to hide the border before the flash goes off
       await new Promise(resolve => setTimeout(resolve, 150));
       await document.fonts.ready;
 
       const font1742 = await getBase64Resource('/1742.ttf');
       const font1545 = await getBase64Resource('/1545.ttf');
-      // ✅ THE FIX: Force injects the local DotGothic font so Safari can't block it
       const fontDotGothic = await getBase64Resource('/dotgothic16.ttf'); 
 
       let injectedCss = '';
@@ -235,8 +231,7 @@ export default function MacMailer() {
       const options = {
         quality: 1,
         pixelRatio: 2,
-        width: targetNode.offsetWidth, // Locks the width so the text stays wrapped perfectly
-        // ✅ THE FIX: Removed the height lock so the snapshot can freely expand downwards to prevent jams
+        width: targetNode.offsetWidth, 
         fontEmbedCSS: injectedCss,
         style: {
           margin: '0',
@@ -244,7 +239,6 @@ export default function MacMailer() {
         }
       };
 
-      // Double-fire to warm up the cache
       await toPng(targetNode, options);
       const dataUrl = await toPng(targetNode, options);
       
@@ -256,7 +250,6 @@ export default function MacMailer() {
       console.error("Canvas error:", error);
       showToast("Failed to save image. Please try again."); 
     } finally {
-      // Put the border back on the live screen when done
       setIsDownloading(false);
     }
   };
@@ -270,36 +263,50 @@ export default function MacMailer() {
             <div className="mac-titlebar draggable-handle">Your Sent Letter</div>
             <div className="mac-content">
               
-              {/* ✅ THE FIX: Conditionally strips the border purely through inline React styling */}
               <div 
                 className={`letter-preview ${paperFormat}`} 
                 ref={letterRef}
                 style={{ border: isDownloading ? 'none' : '2px solid #000' }}
               >
                 
-                {paperFormat === 'letter' && (
-                  <div className="letter-top-banner">
-                    <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
-                  </div>
-                )}
+                {/* ✅ THE FIX: Separate rendering logic for US Letter vs Receipt */}
+                {paperFormat === 'letter' ? (
+                  <>
+                    <div className="letter-top-banner">
+                      <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
+                    </div>
+                    <div className="letter-header">
+                      <div>To: {sentLetter.to}</div>
+                      <div>Subject: {sentLetter.subject}</div>
+                      <div>
+                        Sent: {sentLetter.sendTime 
+                          ? new Date(sentLetter.sendTime).toLocaleString('en-US', { hour12: true }) 
+                          : new Date().toLocaleString('en-US', { hour12: true })}
+                      </div>
+                    </div>
+                    <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
+                  </>
+                ) : (
+                  /* ✅ THE FIX: Custom Receipt Layout exactly matching the photo */
+                  <>
+                    <div className="receipt-header-info">
+                      <div>TO: {sentLetter.to}</div>
+                      <div>SUBJECT: {sentLetter.subject}</div>
+                      <div>
+                        SENT: {sentLetter.sendTime 
+                          ? new Date(sentLetter.sendTime).toLocaleString('en-US', { hour12: true }).toUpperCase() 
+                          : new Date().toLocaleString('en-US', { hour12: true }).toUpperCase()}
+                      </div>
+                    </div>
+                    
+                    <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
 
-                <div className="letter-header">
-                  <div>To: {sentLetter.to}</div>
-                  <div>Subject: {sentLetter.subject}</div>
-                  <div>
-                    Sent: {sentLetter.sendTime 
-                      ? new Date(sentLetter.sendTime).toLocaleString('en-US', { hour12: true }) 
-                      : new Date().toLocaleString('en-US', { hour12: true })}
-                  </div>
-                </div>
+                    <div className="receipt-bottom-banner">
+                      <div className="receipt-catchphrase">TU PEUX LACHER PRISE</div>
+                    </div>
+                  </>
+                )}
                 
-                <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
-
-                {paperFormat === 'receipt' && (
-                  <div className="receipt-bottom-banner">
-                    <div className="receipt-catchphrase">TU PEUX LACHER PRISE</div>
-                  </div>
-                )}
               </div>
 
               <div className="flex-between" style={{ marginTop: '20px', flexWrap: 'wrap', gap: '10px' }}>
