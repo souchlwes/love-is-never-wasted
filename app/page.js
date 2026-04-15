@@ -37,7 +37,6 @@ export default function MacMailer() {
   const [isZoomed, setIsZoomed] = useState(false);
 
   const [paperFormat, setPaperFormat] = useState("receipt");
-  // ✅ THE FIX: New state to control the selected letter font
   const [letterFont, setLetterFont] = useState("1742");
 
   const [activeStyles, setActiveStyles] = useState({
@@ -211,7 +210,7 @@ export default function MacMailer() {
     if (!letterRef.current) return;
     
     setIsDownloading(true);
-    showToast("Developing your letter... (Bypassing Safari Security)"); 
+    showToast("Developing your letter..."); 
 
     try {
       await new Promise(resolve => setTimeout(resolve, 150));
@@ -220,7 +219,6 @@ export default function MacMailer() {
       const font1742 = await getBase64Resource('/1742.ttf');
       const font1545 = await getBase64Resource('/1545.ttf');
       const fontDotGothic = await getBase64Resource('/dotgothic16.ttf'); 
-      // ✅ THE FIX: We also fetch the new 1669 font for Safari rendering
       const font1669 = await getBase64Resource('/1669.ttf'); 
 
       let injectedCss = '';
@@ -264,10 +262,10 @@ export default function MacMailer() {
     return `${mm}${dd}`;
   };
 
-  // Helper for the formal letterhead date
+  // ✅ THE FIX: Formats the date naturally (e.g., April 15, 2026) without all-caps
   const getFormalDate = (dateString) => {
     const date = dateString ? new Date(dateString) : new Date();
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -280,7 +278,6 @@ export default function MacMailer() {
             <div className="mac-content">
               
               <div 
-                // ✅ THE FIX: Dynamically injects the selected font class
                 className={`letter-preview ${paperFormat} font-${letterFont}`} 
                 ref={letterRef}
                 style={{ border: isDownloading ? 'none' : (paperFormat === 'receipt' ? 'none' : '2px solid #000') }}
@@ -288,31 +285,18 @@ export default function MacMailer() {
                 
                 {paperFormat === 'letter' ? (
                   <>
-                    {/* ✅ THE FIX: Brand new, highly readable, vintage stationery letterhead */}
-                    <div className="vintage-letterhead-header">
+                    <div className="letter-top-banner">
                       <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
-                      
-                      <div className="vintage-divider"></div>
-                      
-                      <div className="vintage-meta-container">
-                        <div className="vintage-meta-row">
-                          <div className="vintage-meta-group">
-                            <span className="vintage-meta-label">TO:</span>
-                            <span className="vintage-meta-value">{sentLetter.to}</span>
-                          </div>
-                          <div className="vintage-meta-group">
-                            <span className="vintage-meta-label">DATE:</span>
-                            <span className="vintage-meta-value">{getFormalDate(sentLetter.sendTime)}</span>
-                          </div>
-                        </div>
-                        <div className="vintage-meta-row" style={{ marginTop: '15px' }}>
-                          <div className="vintage-meta-group">
-                            <span className="vintage-meta-label">SUBJECT:</span>
-                            <span className="vintage-meta-value">{sentLetter.subject}</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
+                    
+                    {/* ✅ THE FIX: Tightly packed header metadata sitting right above the divider */}
+                    <div className="letter-header-compact">
+                      <div><strong>TO:</strong> {sentLetter.to}</div>
+                      <div><strong>DATE:</strong> {getFormalDate(sentLetter.sendTime)}</div>
+                      <div><strong>SUBJECT:</strong> {sentLetter.subject}</div>
+                    </div>
+                    
+                    <div className="vintage-divider"></div>
 
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
                   </>
@@ -360,7 +344,6 @@ export default function MacMailer() {
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                   
-                  {/* ✅ THE FIX: The new dropdown to let users select between 1742 and 1669 fonts */}
                   {paperFormat === 'letter' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <label style={{ fontWeight: 'bold', margin: 0 }}>Font:</label>
