@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { toPng } from 'html-to-image';
 import Draggable from "react-draggable";
 
-// ✅ THE FIX PART 1: Safari Security Bypass function.
-// This turns your font files into raw text data so Safari can't block them during the screenshot.
+// Safari Security Bypass function.
 const getBase64Resource = async (url) => {
   try {
     const res = await fetch(url);
@@ -98,7 +97,6 @@ export default function MacMailer() {
     localStorage.setItem('macMailerDraft', JSON.stringify(newValues));
   };
 
-  // Strips copied fonts and keeps it retro plain text
   const handlePaste = (e) => {
     e.preventDefault();
     const text = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
@@ -108,7 +106,6 @@ export default function MacMailer() {
   const formatText = (command) => {
     document.execCommand(command, false, null);
     
-    // Logic to handle mutually exclusive alignment buttons
     if (['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'].includes(command)) {
       setActiveStyles(prev => ({
         ...prev,
@@ -215,32 +212,31 @@ export default function MacMailer() {
     try {
       await document.fonts.ready;
 
-      // 1. Fetch fonts as raw Base64 data to trick the browser
       const font1742 = await getBase64Resource('/1742.ttf');
       const font1545 = await getBase64Resource('/1545.ttf');
 
-      // 2. Build a raw CSS string to force-feed into html-to-image
       let injectedCss = '';
       if (font1742) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742}') format('truetype'); }\n`;
       if (font1545) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545}') format('truetype'); }\n`;
 
+      const targetNode = letterRef.current;
+
+      // ✅ THE FIX: Force the image generator to capture the exact physical pixel dimensions of the container
       const options = {
         quality: 1,
         pixelRatio: 2,
-        fontEmbedCSS: injectedCss, // Inject the raw font code so Safari can't block it
+        width: targetNode.offsetWidth, // Locks the frame width
+        height: targetNode.offsetHeight, // Locks the frame height
+        fontEmbedCSS: injectedCss,
         style: {
           border: 'none', 
-          boxShadow: 'none'
+          boxShadow: 'none',
+          margin: '0'
         }
       };
 
-      // ✅ THE FIX PART 2: THE SAFARI HACK
-      // Safari often outputs a blank or wrong-font image on the first try because it hasn't cached the SVG. 
-      // We run the capture function once silently to "warm up" the cache...
-      await toPng(letterRef.current, options);
-      
-      // ...and then immediately run it again to get the actual perfect image!
-      const dataUrl = await toPng(letterRef.current, options);
+      await toPng(targetNode, options);
+      const dataUrl = await toPng(targetNode, options);
       
       const link = document.createElement("a");
       link.href = dataUrl;
