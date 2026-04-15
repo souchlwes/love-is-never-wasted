@@ -15,6 +15,17 @@
   src: url('/typewriter.ttf') format('truetype');
 }
 
+/* ✅ NEW: Fonts 1742 and 1545 loaded directly from the public folder */
+@font-face {
+  font-family: '1742';
+  src: url('/1742.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: '1545';
+  src: url('/1545.ttf') format('truetype');
+}
+
 body {
   /* The main site UI uses the lined paper */
   background-image: url('/linedpaper.jpg');
@@ -416,13 +427,17 @@ button:disabled {
   font-weight: bold;
 }
 
-/* 📄 US LETTER FORMAT: Standard Typewriter Style */
+/* 📄 US LETTER FORMAT: Updated Fonts & Banners */
 .letter-preview.letter {
   background-image: url('/texturedpaper.jpg');
   background-size: cover;
   background-position: center;
-  font-family: 'Typewriter', monospace; 
+  
+  /* ✅ THE FIX: Swapped Typewriter for the 1742 font */
+  font-family: '1742', monospace; 
   color: rgba(30, 30, 30, 0.95); 
+  
+  /* Maintained the exact same bleeding style */
   text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
   white-space: pre-wrap;
   line-height: 1.6;
@@ -432,6 +447,22 @@ button:disabled {
   min-height: 300px; 
   padding: 60px; 
   font-size: 18px; 
+}
+
+/* ✅ NEW: Letter Top Banner specifically for US Letter format */
+.letter-top-banner {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.letter-catchphrase {
+  /* ✅ THE FIX: Using the 1545 font with the exact same bleeding shadow */
+  font-family: '1545', monospace;
+  font-size: 26px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: rgba(30, 30, 30, 0.95);
+  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2);
 }
 
 /* =========================================
@@ -446,28 +477,22 @@ button:disabled {
   background-size: 4px 4px;
   background-position: 0 0, 2px 2px;
   
-  /* ✅ THE FIX: Thinner max-width to realistically mimic a receipt roll */
   max-width: 320px; 
   padding: 30px 20px;
   
-  /* USES THE DOTGOTHIC16 FONT */
   font-family: 'DotGothic16', monospace; 
-  /* ✅ THE FIX: Slightly smaller font & tighter line-height for dense POS printing */
   font-size: 15px; 
   text-transform: uppercase; 
   letter-spacing: 0.5px;
   line-height: 1.4; 
   white-space: pre-wrap;
   
-  /* Matches the exact grayish-black ink from the picture with stronger bleed */
   color: #383838;
   text-shadow: 0.5px 0.5px 1px rgba(56, 56, 56, 0.7), -0.2px -0.2px 0px rgba(56, 56, 56, 0.3);
   
-  /* Inner shadow mimics the natural curl of paper off the roll */
   box-shadow: inset 0 0 25px rgba(0,0,0,0.06), inset 15px 0 20px rgba(0,0,0,0.03), inset -15px 0 20px rgba(0,0,0,0.03); 
 }
 
-/* ✅ THE FIX: Target the header specifically when in receipt mode to look like a POS system */
 .letter-preview.receipt .letter-header {
   text-align: center;
   border-bottom: 2px dashed rgba(56, 56, 56, 0.6);
@@ -475,7 +500,6 @@ button:disabled {
   margin-bottom: 15px;
 }
 
-/* The Bottom Banner */
 .receipt-bottom-banner {
   text-align: center;
   margin-top: 25px;
@@ -484,8 +508,8 @@ button:disabled {
 }
 
 .receipt-catchphrase {
-  /* Uses DotGothic16 as requested */
-  font-family: 'DotGothic16', monospace;
+  /* ✅ THE FIX: Also swapped to the 1545 font for the receipt */
+  font-family: '1545', monospace;
   font-size: 20px;
   font-weight: bold;
   text-transform: uppercase;
