@@ -262,7 +262,6 @@ export default function MacMailer() {
     return `${mm}${dd}`;
   };
 
-  // ✅ THE FIX: Uses natural casing and keeps the time on the same line! 
   const getFormalDate = (dateString) => {
     const date = dateString ? new Date(dateString) : new Date();
     return date.toLocaleString('en-US', { 
@@ -288,21 +287,21 @@ export default function MacMailer() {
                 
                 {paperFormat === 'letter' ? (
                   <>
-                    <div className="letter-top-banner">
-                      <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
-                    </div>
-                    
-                    {/* ✅ THE FIX: Tightly packed, standard text so the selected font naturally takes over */}
+                    {/* ✅ THE FIX: The top catchphrase is gone, starting clean with metadata */}
                     <div className="letter-header-compact">
-                      <div>To: {sentLetter.to}</div>
-                      <div>Subject: {sentLetter.subject}</div>
-                      <div>Date: {getFormalDate(sentLetter.sendTime)}</div>
+                      <div><strong>TO:</strong> {sentLetter.to}</div>
+                      <div><strong>SUBJECT:</strong> {sentLetter.subject}</div>
+                      <div><strong>DATE:</strong> {getFormalDate(sentLetter.sendTime)}</div>
                     </div>
                     
-                    {/* ✅ THE FIX: A single, simple dashed divider sitting right below the metadata */}
                     <div className="vintage-divider"></div>
 
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
+
+                    {/* ✅ THE FIX: Catchphrase moved to the footer with a solid line above it */}
+                    <div className="letter-footer">
+                      <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
+                    </div>
                   </>
                 ) : (
                   <>
