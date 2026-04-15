@@ -413,7 +413,7 @@ button:disabled {
 
 .letter-top-banner {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .letter-catchphrase {
@@ -426,56 +426,53 @@ button:disabled {
   text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2);
 }
 
-/* ✅ THE FIX: Compact letterhead, stacked neatly */
+/* ✅ THE FIX: Tightly packed header sitting right above the divider */
 .letter-header-compact {
   text-align: left;
-  font-size: 20px;
-  color: #3a3a3a;
-  line-height: 1.4;
-  margin-bottom: 15px; /* Minimal space before the line */
+  margin-bottom: 10px; 
 }
 
-/* ✅ THE FIX: Labels use the bold 1545 font */
-.letter-header-compact strong {
-  font-family: '1545', monospace !important;
-  margin-right: 8px;
-  color: #555;
-  letter-spacing: 1px;
+.letter-header-compact div {
+  margin-bottom: 2px; /* Removes huge spacing between lines */
 }
 
-/* ✅ THE FIX: Reverted to a single simple divider under the metadata */
+/* ✅ THE FIX: Simple, clean dashed divider */
 .vintage-divider {
-  height: 2px;
-  border-top: 1px solid rgba(40, 40, 40, 0.6);
-  border-bottom: 1px solid rgba(40, 40, 40, 0.6);
-  margin: 10px 0 25px 0; /* Tight spacing above, breathing room below for the letter */
+  border-top: 1.5px dashed rgba(68, 68, 68, 0.6);
+  margin: 10px 0 25px 0; 
 }
 
-/* ✅ THE FIX: Shrunk the font down to 20px and added the stamped texture to the letter body! */
 .letter-preview.letter .letter-body {
-  font-size: 20px; 
-  line-height: 1.6;
-  padding: 0 10px;
-  
-  /* Stamped Ink Bleed Texture */
-  color: #444444; 
-  letter-spacing: 1px;
+  padding: 0;
+}
+
+/* ✅ THE FIX: Locks in Font 1742 with standard size and stamped texture */
+.letter-preview.font-1742 .letter-header-compact,
+.letter-preview.font-1742 .letter-body,
+.letter-preview.font-1742 .letter-body * {
+  font-family: '1742', monospace !important;
+  font-size: 18px !important;
+  line-height: 1.5;
+  color: #444444;
+  letter-spacing: 0.5px;
   text-shadow: 
     0px 0px 1px rgba(68, 68, 68, 0.8), 
     0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
 
-/* ✅ THE FIX: Let users toggle perfectly between 1742 and 1669, inheriting the stamped texture */
-.letter-preview.font-1742 .letter-header-compact div,
-.letter-preview.font-1742 .letter-body * {
-  font-family: '1742', monospace !important;
-}
-
-.letter-preview.font-1669 .letter-header-compact div,
+/* ✅ THE FIX: Scales down 1669 to a readable size and forcefully applies the exact same stamped texture */
+.letter-preview.font-1669 .letter-header-compact,
+.letter-preview.font-1669 .letter-body,
 .letter-preview.font-1669 .letter-body * {
   font-family: '1669', monospace !important;
+  font-size: 20px !important; /* Script fonts need to be slightly larger than typewriters to be legible, but much smaller than what we had! */
+  line-height: 1.5;
+  color: #444444;
+  letter-spacing: 0.5px;
+  text-shadow: 
+    0px 0px 1px rgba(68, 68, 68, 0.8), 
+    0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
-
 
 /* =========================================
    🧾 APOTHECARY LABEL FORMAT (Receipt)
