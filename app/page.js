@@ -262,10 +262,13 @@ export default function MacMailer() {
     return `${mm}${dd}`;
   };
 
-  // ✅ THE FIX: Formats the date naturally (e.g., April 15, 2026) without all-caps
+  // ✅ THE FIX: Uses natural casing and keeps the time on the same line! 
   const getFormalDate = (dateString) => {
     const date = dateString ? new Date(dateString) : new Date();
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    return date.toLocaleString('en-US', { 
+      month: 'long', day: 'numeric', year: 'numeric', 
+      hour: 'numeric', minute: 'numeric', hour12: true 
+    });
   };
 
   return (
@@ -289,13 +292,14 @@ export default function MacMailer() {
                       <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
                     </div>
                     
-                    {/* ✅ THE FIX: Tightly packed header metadata sitting right above the divider */}
+                    {/* ✅ THE FIX: Tightly packed, standard text so the selected font naturally takes over */}
                     <div className="letter-header-compact">
-                      <div><strong>TO:</strong> {sentLetter.to}</div>
-                      <div><strong>DATE:</strong> {getFormalDate(sentLetter.sendTime)}</div>
-                      <div><strong>SUBJECT:</strong> {sentLetter.subject}</div>
+                      <div>To: {sentLetter.to}</div>
+                      <div>Subject: {sentLetter.subject}</div>
+                      <div>Date: {getFormalDate(sentLetter.sendTime)}</div>
                     </div>
                     
+                    {/* ✅ THE FIX: A single, simple dashed divider sitting right below the metadata */}
                     <div className="vintage-divider"></div>
 
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
