@@ -209,20 +209,19 @@ export default function MacMailer() {
     if (!letterRef.current) return;
     
     setIsDownloading(true);
-    showToast("Developing your letter..."); 
+    showToast("Developing your letter... (Bypassing Safari Security)"); 
 
     try {
       await new Promise(resolve => setTimeout(resolve, 150));
       await document.fonts.ready;
 
-      // ✅ THE FIX: Ensuring the slightly fuzzy Typewriter font is loaded for the body texture
-      const font1742TypewriterFuzzy = await getBase64Resource('/1742.ttf');
-      const font1545Bold = await getBase64Resource('/1545.ttf');
+      const font1742 = await getBase64Resource('/1742.ttf');
+      const font1545 = await getBase64Resource('/1545.ttf');
       const fontDotGothic = await getBase64Resource('/dotgothic16.ttf'); 
 
       let injectedCss = '';
-      if (font1742TypewriterFuzzy) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742TypewriterFuzzy}') format('truetype'); }\n`;
-      if (font1545Bold) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545Bold}') format('truetype'); }\n`;
+      if (font1742) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742}') format('truetype'); }\n`;
+      if (font1545) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545}') format('truetype'); }\n`;
       if (fontDotGothic) injectedCss += `@font-face { font-family: 'DotGothic16'; src: url('${fontDotGothic}') format('truetype'); }\n`;
 
       const targetNode = letterRef.current;
@@ -295,15 +294,19 @@ export default function MacMailer() {
                   <>
                     <div className="apothecary-grid">
                       <div className="apothecary-row">
-                        <div className="apothecary-cell cell-70">
+                        <div className="apothecary-cell cell-60">
                           <span className="tiny-label">NAME</span>
                           <span className="main-val">{sentLetter.to}</span>
                         </div>
-                        <div className="apothecary-cell cell-30">
+                        <div className="apothecary-cell cell-40">
                           <span className="tiny-label">BOTTLE NO.</span>
-                          <div className="main-val red-text">
-                            <span style={{fontSize: '18px', marginRight: '5px'}}>Nº</span> 
-                            {formatBottleNumber(sentLetter.sendTime)} / {new Date().getFullYear()}
+                          {/* ✅ THE FIX: The Nº and Date are Red, but the "/ 2026" is the textured black, perfectly mimicking the Oregon Ouzo label! */}
+                          <div className="main-val" style={{ whiteSpace: 'nowrap' }}>
+                            <span className="red-text">
+                              <span style={{fontSize: '18px', marginRight: '5px'}}>Nº</span> 
+                              {formatBottleNumber(sentLetter.sendTime)}
+                            </span>
+                            <span> / {new Date().getFullYear()}</span>
                           </div>
                         </div>
                       </div>
@@ -311,6 +314,7 @@ export default function MacMailer() {
                       <div className="apothecary-row">
                         <div className="apothecary-cell cell-20">
                           <span className="tiny-label">BATCH NO.</span>
+                          {/* ✅ THE FIX: The 01 is distinctly red */}
                           <span className="main-val red-text" style={{ fontSize: '32px' }}>01</span>
                         </div>
                         <div className="apothecary-cell cell-80">
