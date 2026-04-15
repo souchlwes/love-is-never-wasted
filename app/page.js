@@ -36,10 +36,8 @@ export default function MacMailer() {
   
   const [isZoomed, setIsZoomed] = useState(false);
 
-  // Track the chosen paper format
   const [paperFormat, setPaperFormat] = useState("receipt");
 
-  // Track active formatting toggles
   const [activeStyles, setActiveStyles] = useState({
     bold: false,
     italic: false,
@@ -211,7 +209,7 @@ export default function MacMailer() {
     if (!letterRef.current) return;
     
     setIsDownloading(true);
-    showToast("Developing your letter..."); 
+    showToast("Developing your letter... (Bypassing Safari Security)"); 
 
     try {
       await new Promise(resolve => setTimeout(resolve, 150));
@@ -254,6 +252,14 @@ export default function MacMailer() {
     }
   };
 
+  // Helper to format date into numbers for the top right apothecary label
+  const formatBottleNumber = (dateString) => {
+    const date = dateString ? new Date(dateString) : new Date();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${mm}${dd}`;
+  };
+
   return (
     <main className="layout-container">
       
@@ -269,7 +275,6 @@ export default function MacMailer() {
                 style={{ border: isDownloading ? 'none' : '2px solid #000' }}
               >
                 
-                {/* ✅ THE FIX: Separate rendering logic for US Letter vs Receipt */}
                 {paperFormat === 'letter' ? (
                   <>
                     <div className="letter-top-banner">
@@ -287,22 +292,43 @@ export default function MacMailer() {
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
                   </>
                 ) : (
-                  /* ✅ THE FIX: Custom Receipt Layout exactly matching the photo */
+                  /* ✅ THE FIX: Custom Apothecary Grid Layout exactly matching the photo */
                   <>
-                    <div className="receipt-header-info">
-                      <div>TO: {sentLetter.to}</div>
-                      <div>SUBJECT: {sentLetter.subject}</div>
-                      <div>
-                        SENT: {sentLetter.sendTime 
-                          ? new Date(sentLetter.sendTime).toLocaleString('en-US', { hour12: true }).toUpperCase() 
-                          : new Date().toLocaleString('en-US', { hour12: true }).toUpperCase()}
+                    <div className="apothecary-grid">
+                      {/* Row 1 */}
+                      <div className="apothecary-row">
+                        <div className="apothecary-cell cell-70">
+                          <span className="tiny-label">NAME</span>
+                          <span className="main-val">{sentLetter.to}</span>
+                        </div>
+                        <div className="apothecary-cell cell-30">
+                          <span className="tiny-label">BOTTLE NO.</span>
+                          <div className="main-val red-text">
+                            <span style={{fontSize: '18px', marginRight: '5px'}}>Nº</span> 
+                            {formatBottleNumber(sentLetter.sendTime)} / {new Date().getFullYear()}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Row 2 */}
+                      <div className="apothecary-row">
+                        <div className="apothecary-cell cell-20">
+                          <span className="tiny-label">BATCH NO.</span>
+                          <span className="main-val red-text" style={{ fontSize: '32px' }}>01</span>
+                        </div>
+                        <div className="apothecary-cell cell-80">
+                          <span className="tiny-label">ELEMENTS</span>
+                          <span className="main-val">{sentLetter.subject}</span>
+                        </div>
                       </div>
                     </div>
                     
+                    {/* The main message area acts as the 'Warning Text' from the peg */}
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
 
-                    <div className="receipt-bottom-banner">
-                      <div className="receipt-catchphrase">TU PEUX LACHER PRISE</div>
+                    {/* The thick line and bottom catchphrase matching the peg */}
+                    <div className="apothecary-footer">
+                      <div className="apothecary-catchphrase">TU PEUX LACHER PRISE</div>
                     </div>
                   </>
                 )}
@@ -320,7 +346,7 @@ export default function MacMailer() {
                       value={paperFormat} 
                       onChange={(e) => setPaperFormat(e.target.value)}
                     >
-                      <option value="receipt">Receipt (Narrow)</option>
+                      <option value="receipt">Vintage Label (Grid)</option>
                       <option value="letter">US Letter (Wide)</option>
                     </select>
                   </div>
