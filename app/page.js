@@ -37,6 +37,8 @@ export default function MacMailer() {
   const [isZoomed, setIsZoomed] = useState(false);
 
   const [paperFormat, setPaperFormat] = useState("receipt");
+  // ✅ THE FIX: New state to control the selected letter font
+  const [letterFont, setLetterFont] = useState("1742");
 
   const [activeStyles, setActiveStyles] = useState({
     bold: false,
@@ -218,11 +220,14 @@ export default function MacMailer() {
       const font1742 = await getBase64Resource('/1742.ttf');
       const font1545 = await getBase64Resource('/1545.ttf');
       const fontDotGothic = await getBase64Resource('/dotgothic16.ttf'); 
+      // ✅ THE FIX: We also fetch the new 1669 font for Safari rendering
+      const font1669 = await getBase64Resource('/1669.ttf'); 
 
       let injectedCss = '';
       if (font1742) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742}') format('truetype'); }\n`;
       if (font1545) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545}') format('truetype'); }\n`;
       if (fontDotGothic) injectedCss += `@font-face { font-family: 'DotGothic16'; src: url('${fontDotGothic}') format('truetype'); }\n`;
+      if (font1669) injectedCss += `@font-face { font-family: '1669'; src: url('${font1669}') format('truetype'); }\n`;
 
       const targetNode = letterRef.current;
 
@@ -259,6 +264,12 @@ export default function MacMailer() {
     return `${mm}${dd}`;
   };
 
+  // Helper for the formal letterhead date
+  const getFormalDate = (dateString) => {
+    const date = dateString ? new Date(dateString) : new Date();
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase();
+  };
+
   return (
     <main className="layout-container">
       
@@ -269,25 +280,40 @@ export default function MacMailer() {
             <div className="mac-content">
               
               <div 
-                className={`letter-preview ${paperFormat}`} 
+                // ✅ THE FIX: Dynamically injects the selected font class
+                className={`letter-preview ${paperFormat} font-${letterFont}`} 
                 ref={letterRef}
-                style={{ border: isDownloading ? 'none' : '2px solid #000' }}
+                style={{ border: isDownloading ? 'none' : (paperFormat === 'receipt' ? 'none' : '2px solid #000') }}
               >
                 
                 {paperFormat === 'letter' ? (
                   <>
-                    <div className="letter-top-banner">
+                    {/* ✅ THE FIX: Brand new, highly readable, vintage stationery letterhead */}
+                    <div className="vintage-letterhead-header">
                       <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
-                    </div>
-                    <div className="letter-header">
-                      <div>To: {sentLetter.to}</div>
-                      <div>Subject: {sentLetter.subject}</div>
-                      <div>
-                        Sent: {sentLetter.sendTime 
-                          ? new Date(sentLetter.sendTime).toLocaleString('en-US', { hour12: true }) 
-                          : new Date().toLocaleString('en-US', { hour12: true })}
+                      
+                      <div className="vintage-divider"></div>
+                      
+                      <div className="vintage-meta-container">
+                        <div className="vintage-meta-row">
+                          <div className="vintage-meta-group">
+                            <span className="vintage-meta-label">TO:</span>
+                            <span className="vintage-meta-value">{sentLetter.to}</span>
+                          </div>
+                          <div className="vintage-meta-group">
+                            <span className="vintage-meta-label">DATE:</span>
+                            <span className="vintage-meta-value">{getFormalDate(sentLetter.sendTime)}</span>
+                          </div>
+                        </div>
+                        <div className="vintage-meta-row" style={{ marginTop: '15px' }}>
+                          <div className="vintage-meta-group">
+                            <span className="vintage-meta-label">SUBJECT:</span>
+                            <span className="vintage-meta-value">{sentLetter.subject}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
+
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
                   </>
                 ) : (
@@ -299,9 +325,7 @@ export default function MacMailer() {
                           <span className="main-val">{sentLetter.to}</span>
                         </div>
                         <div className="apothecary-cell cell-40">
-                          {/* ✅ THE FIX: Changed BOTTLE NO. to DATE */}
                           <span className="tiny-label">DATE</span>
-                          {/* ✅ THE FIX: The entire date string, including the year, is now wrapped in the red-text class */}
                           <div className="main-val red-text" style={{ whiteSpace: 'nowrap' }}>
                             <span style={{fontSize: '18px', marginRight: '5px'}}>Nº</span> 
                             {formatBottleNumber(sentLetter.sendTime)} / {new Date().getFullYear()}
@@ -315,7 +339,6 @@ export default function MacMailer() {
                           <span className="main-val red-text" style={{ fontSize: '32px' }}>01</span>
                         </div>
                         <div className="apothecary-cell cell-80">
-                          {/* ✅ THE FIX: Changed ELEMENTS to SUBJECT */}
                           <span className="tiny-label">SUBJECT</span>
                           <span className="main-val">{sentLetter.subject}</span>
                         </div>
@@ -335,21 +358,42 @@ export default function MacMailer() {
               <div className="flex-between" style={{ marginTop: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <button onClick={() => setSentLetter(null)}>Write Another</button>
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <label style={{ fontWeight: 'bold', margin: 0 }}>Format:</label>
-                  <div className="retro-select-wrapper">
-                    <select 
-                      className="format-selector"
-                      value={paperFormat} 
-                      onChange={(e) => setPaperFormat(e.target.value)}
-                    >
-                      <option value="receipt">Vintage Label (Grid)</option>
-                      <option value="letter">US Letter (Wide)</option>
-                    </select>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  
+                  {/* ✅ THE FIX: The new dropdown to let users select between 1742 and 1669 fonts */}
+                  {paperFormat === 'letter' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <label style={{ fontWeight: 'bold', margin: 0 }}>Font:</label>
+                      <div className="retro-select-wrapper">
+                        <select 
+                          className="format-selector"
+                          value={letterFont} 
+                          onChange={(e) => setLetterFont(e.target.value)}
+                        >
+                          <option value="1742">1742</option>
+                          <option value="1669">1669</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <label style={{ fontWeight: 'bold', margin: 0 }}>Format:</label>
+                    <div className="retro-select-wrapper">
+                      <select 
+                        className="format-selector"
+                        value={paperFormat} 
+                        onChange={(e) => setPaperFormat(e.target.value)}
+                      >
+                        <option value="receipt">Vintage Label</option>
+                        <option value="letter">US Letter</option>
+                      </select>
+                    </div>
                   </div>
+
                 </div>
 
-                <button onClick={downloadImage}>Save as Image</button>
+                <button onClick={downloadImage}>Save Image</button>
               </div>
               
             </div>
