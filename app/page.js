@@ -218,7 +218,6 @@ export default function MacMailer() {
               
               <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
                 
-                {/* ✅ Added the top banner for the US Letter format */}
                 {paperFormat === 'letter' && (
                   <div className="letter-top-banner">
                     <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
