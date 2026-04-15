@@ -441,11 +441,11 @@ button:disabled {
    🧾 APOTHECARY LABEL FORMAT (Receipt)
    ========================================= */
 .letter-preview.receipt {
-  /* Vintage cream paper color */
+  /* Vintage cream paper color with authentic texture */
   background-color: #fcfaf5;
-  background-image: none; 
+  background-image: url('/texturedpaper.jpg'); /* ✅ THE FIX: Authentic paper background applied */
+  background-size: cover;
   
-  /* Wider rectangular layout */
   width: 500px; 
   max-width: 100%;
   box-sizing: border-box; 
@@ -462,18 +462,53 @@ button:disabled {
   word-break: break-word; 
   
   color: #1a1a1a;
-  /* Soft shadow for the text */
   text-shadow: 0.5px 0.5px 0px rgba(26, 26, 26, 0.2);
   box-shadow: inset 0 0 40px rgba(0,0,0,0.03), 2px 2px 10px rgba(0,0,0,0.1); 
 }
 
-.letter-preview.receipt,
-.letter-preview.receipt .letter-body * {
-  /* Body uses the requested DotGothic16 */
-  font-family: 'DotGothic16', monospace !important;
+/* Grid Typography */
+.tiny-label {
+  /* ✅ THE FIX: Changed labels to match the Bold footer font (1545) */
+  font-family: '1545', monospace !important; 
+  font-size: 14px; /* Increased size to match footer weight legibly */
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+  color: #1a1a1a;
 }
 
-/* --- The Apothecary Grid System --- */
+.main-val {
+  /* Grid data values stay crisp as requested */
+  font-family: 'DotGothic16', monospace !important;
+  font-size: 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* --- The Body and Footer --- */
+.letter-preview.receipt .letter-body {
+  padding: 10px 0;
+  text-align: justify;
+
+  /* ✅ THE FIX: Applying the precise texture and look from the reference photo */
+  font-family: '1742', monospace !important; /* Switch to slightly fuzzier typewriter font for body realism */
+  color: #555555; /* Lightened color to match peg */
+  letter-spacing: 2px; /* Widened letter spacing as requested */
+  
+  /* Text-shadow simulates authentic typewriter ink bleeding into paper fibers */
+  text-shadow: 
+    0px 0px 1px rgba(85, 85, 85, 0.8), 
+    0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
+}
+
+.letter-preview.receipt .letter-body * {
+  /* Force all body text, lists, etc. to use the texture style */
+  font-family: '1742', monospace !important;
+  color: #555555;
+  letter-spacing: 2px;
+}
+
+/* Grid formatting logic unchanged */
 .apothecary-grid {
   display: flex;
   flex-direction: column;
@@ -481,7 +516,6 @@ button:disabled {
   border-bottom: 1px solid #1a1a1a;
   margin-bottom: 25px;
 }
-
 .apothecary-row {
   display: flex;
   border-bottom: 1px solid #1a1a1a;
@@ -489,7 +523,6 @@ button:disabled {
 .apothecary-row:last-child {
   border-bottom: none;
 }
-
 .apothecary-cell {
   padding: 10px 15px;
   display: flex;
@@ -500,56 +533,25 @@ button:disabled {
 .apothecary-cell:last-child {
   border-right: none;
 }
-
-/* Column Widths */
 .cell-70 { width: 70%; }
 .cell-30 { width: 30%; }
 .cell-20 { width: 20%; }
 .cell-80 { width: 80%; }
-
-/* Grid Typography */
-.tiny-label {
-  font-family: '1742', monospace !important; /* Typewriter look for small labels */
-  font-size: 10px;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-  color: #1a1a1a;
-}
-
-.main-val {
-  /* Data values use the body font as requested */
-  font-family: 'DotGothic16', monospace !important;
-  font-size: 20px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
 .red-text {
-  /* Red accent color from the photo */
   color: #b32c25;
   text-shadow: 0.5px 0.5px 0px rgba(179, 44, 37, 0.2);
 }
-
 .apothecary-cell.cell-30 .main-val.red-text {
   font-size: 26px;
   font-weight: bold;
 }
-
-/* --- The Body and Footer --- */
-.letter-preview.receipt .letter-body {
-  padding: 10px 0;
-  text-align: justify;
-}
-
 .apothecary-footer {
-  border-top: 2px solid #1a1a1a; /* Thick line at the bottom */
+  border-top: 2px solid #1a1a1a; 
   margin-top: 20px;
   padding-top: 20px;
   text-align: center;
 }
-
 .apothecary-catchphrase {
-  /* Footer uses the 1545 font */
   font-family: '1545', monospace !important;
   font-size: 24px;
   font-weight: bold;
