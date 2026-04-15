@@ -195,36 +195,35 @@ export default function MacMailer() {
     if (!letterRef.current) return;
     showToast("Developing your letter..."); 
 
-    // ✅ THE FIX: Create a temporary style element to inject the font rules
-    const styleEl = document.createElement("style");
-    styleEl.innerHTML = `
-      @font-face {
-        font-family: '1742';
-        src: url('/1742.ttf') format('truetype');
-      }
-      @font-face {
-        font-family: '1545';
-        src: url('/1545.ttf') format('truetype');
-      }
-    `;
-
-    // Append the style tag directly *inside* the element html2canvas is capturing
-    letterRef.current.appendChild(styleEl);
-
     try {
+      // ✅ THE FIX PART 1: Force the browser to finish loading all fonts before taking the picture
+      await document.fonts.ready;
+
       const canvas = await html2canvas(letterRef.current, {
-        scale: 2, useCORS: true, backgroundColor: null,
-        onclone: (document, element) => { 
-          element.style.border = 'none'; 
-          element.style.boxShadow = 'none';
+        scale: 2, 
+        useCORS: true, 
+        backgroundColor: null,
+        onclone: (clonedDoc, clonedElement) => { 
+          clonedElement.style.border = 'none'; 
+          clonedElement.style.boxShadow = 'none';
+
+          // ✅ THE FIX PART 2: Inject absolute URLs directly into the "ghost" window
+          const baseUrl = window.location.origin; // Gets exactly http://localhost:3000 or your Vercel URL
+          const style = clonedDoc.createElement('style');
+          style.innerHTML = `
+            @font-face { font-family: '1742'; src: url('${baseUrl}/1742.ttf') format('truetype'); }
+            @font-face { font-family: '1545'; src: url('${baseUrl}/1545.ttf') format('truetype'); }
+            @font-face { font-family: 'DotGothic16'; src: url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap'); }
+            @font-face { font-family: 'Typewriter'; src: url('${baseUrl}/typewriter.ttf') format('truetype'); }
+          `;
+          clonedDoc.head.appendChild(style);
         }
       });
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a"); link.href = image; link.download = "loves-never-wasted.png"; link.click();
-    } catch (error) { showToast("Failed to save image. Please try again."); }
-    finally {
-      // ✅ THE CLEANUP: Remove the temporary style tag so it doesn't clutter the DOM
-      letterRef.current.removeChild(styleEl);
+    } catch (error) { 
+      console.error("Canvas error:", error);
+      showToast("Failed to save image. Please try again."); 
     }
   };
 
