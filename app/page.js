@@ -299,14 +299,12 @@ export default function MacMailer() {
                           <span className="main-val">{sentLetter.to}</span>
                         </div>
                         <div className="apothecary-cell cell-40">
-                          <span className="tiny-label">BOTTLE NO.</span>
-                          {/* ✅ THE FIX: The Nº and Date are Red, but the "/ 2026" is the textured black, perfectly mimicking the Oregon Ouzo label! */}
-                          <div className="main-val" style={{ whiteSpace: 'nowrap' }}>
-                            <span className="red-text">
-                              <span style={{fontSize: '18px', marginRight: '5px'}}>Nº</span> 
-                              {formatBottleNumber(sentLetter.sendTime)}
-                            </span>
-                            <span> / {new Date().getFullYear()}</span>
+                          {/* ✅ THE FIX: Changed BOTTLE NO. to DATE */}
+                          <span className="tiny-label">DATE</span>
+                          {/* ✅ THE FIX: The entire date string, including the year, is now wrapped in the red-text class */}
+                          <div className="main-val red-text" style={{ whiteSpace: 'nowrap' }}>
+                            <span style={{fontSize: '18px', marginRight: '5px'}}>Nº</span> 
+                            {formatBottleNumber(sentLetter.sendTime)} / {new Date().getFullYear()}
                           </div>
                         </div>
                       </div>
@@ -314,11 +312,11 @@ export default function MacMailer() {
                       <div className="apothecary-row">
                         <div className="apothecary-cell cell-20">
                           <span className="tiny-label">BATCH NO.</span>
-                          {/* ✅ THE FIX: The 01 is distinctly red */}
                           <span className="main-val red-text" style={{ fontSize: '32px' }}>01</span>
                         </div>
                         <div className="apothecary-cell cell-80">
-                          <span className="tiny-label">ELEMENTS</span>
+                          {/* ✅ THE FIX: Changed ELEMENTS to SUBJECT */}
+                          <span className="tiny-label">SUBJECT</span>
                           <span className="main-val">{sentLetter.subject}</span>
                         </div>
                       </div>
