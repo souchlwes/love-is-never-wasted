@@ -441,11 +441,9 @@ button:disabled {
    🧾 APOTHECARY LABEL FORMAT (Receipt)
    ========================================= */
 .letter-preview.receipt {
-  /* ✅ THE FIX: A darker, earthy vintage tan color */
   background-color: #e8dcc7; 
   background-image: url('/texturedpaper.jpg'); 
   background-size: cover;
-  /* ✅ THE FIX: Multiply blend mode automatically dyes the white texture paper with the darker vintage cream color */
   background-blend-mode: multiply; 
   
   width: 500px; 
@@ -464,7 +462,13 @@ button:disabled {
   
   color: #1a1a1a;
   text-shadow: 0.5px 0.5px 0px rgba(26, 26, 26, 0.2);
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.03), 2px 2px 10px rgba(0,0,0,0.1); 
+  
+  /* ✅ THE FIX: Added realistic rounded corners and a card-like drop shadow */
+  border-radius: 8px; 
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 
+    5px 5px 15px rgba(0,0,0,0.15), /* Outer drop shadow for "card" effect */
+    inset 0 0 40px rgba(0,0,0,0.03); /* Inner paper texture shadow */
 }
 
 /* Grid Typography */
@@ -494,7 +498,6 @@ button:disabled {
     0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
 
-/* ✅ THE FIX: Red text stays strictly red, but gets the same vintage ink bleed texture */
 .red-text {
   color: #b32c25 !important;
   text-shadow: 
