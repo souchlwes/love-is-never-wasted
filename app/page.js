@@ -28,6 +28,9 @@ export default function MacMailer() {
   const [isSending, setIsSending] = useState(false);
   const [sentLetter, setSentLetter] = useState(null);
   
+  // ✅ THE FIX: New state to perfectly strip the border during downloads
+  const [isDownloading, setIsDownloading] = useState(false);
+  
   const [isMobile, setIsMobile] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
@@ -207,34 +210,41 @@ export default function MacMailer() {
 
   const downloadImage = async () => {
     if (!letterRef.current) return;
+    
+    // Set downloading state to physically remove the border from the screen
+    setIsDownloading(true);
     showToast("Developing your letter... (Bypassing Safari Security)"); 
 
     try {
+      // Give React a fraction of a second to hide the border before the flash goes off
+      await new Promise(resolve => setTimeout(resolve, 150));
       await document.fonts.ready;
 
       const font1742 = await getBase64Resource('/1742.ttf');
       const font1545 = await getBase64Resource('/1545.ttf');
+      // ✅ THE FIX: Force injects the local DotGothic font so Safari can't block it
+      const fontDotGothic = await getBase64Resource('/dotgothic16.ttf'); 
 
       let injectedCss = '';
       if (font1742) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742}') format('truetype'); }\n`;
       if (font1545) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545}') format('truetype'); }\n`;
+      if (fontDotGothic) injectedCss += `@font-face { font-family: 'DotGothic16'; src: url('${fontDotGothic}') format('truetype'); }\n`;
 
       const targetNode = letterRef.current;
 
-      // ✅ THE FIX: Force the image generator to capture the exact physical pixel dimensions of the container
       const options = {
         quality: 1,
         pixelRatio: 2,
-        width: targetNode.offsetWidth, // Locks the frame width
-        height: targetNode.offsetHeight, // Locks the frame height
+        width: targetNode.offsetWidth, // Locks the width so the text stays wrapped perfectly
+        // ✅ THE FIX: Removed the height lock so the snapshot can freely expand downwards to prevent jams
         fontEmbedCSS: injectedCss,
         style: {
-          border: 'none', 
-          boxShadow: 'none',
-          margin: '0'
+          margin: '0',
+          boxShadow: 'none'
         }
       };
 
+      // Double-fire to warm up the cache
       await toPng(targetNode, options);
       const dataUrl = await toPng(targetNode, options);
       
@@ -245,6 +255,9 @@ export default function MacMailer() {
     } catch (error) { 
       console.error("Canvas error:", error);
       showToast("Failed to save image. Please try again."); 
+    } finally {
+      // Put the border back on the live screen when done
+      setIsDownloading(false);
     }
   };
 
@@ -257,7 +270,12 @@ export default function MacMailer() {
             <div className="mac-titlebar draggable-handle">Your Sent Letter</div>
             <div className="mac-content">
               
-              <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
+              {/* ✅ THE FIX: Conditionally strips the border purely through inline React styling */}
+              <div 
+                className={`letter-preview ${paperFormat}`} 
+                ref={letterRef}
+                style={{ border: isDownloading ? 'none' : '2px solid #000' }}
+              >
                 
                 {paperFormat === 'letter' && (
                   <div className="letter-top-banner">
