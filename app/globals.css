@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+/* ✅ THE FIX: We removed the Google Fonts import so Safari stops blocking it */
 
 @font-face {
   font-family: 'TheSignature';
@@ -23,6 +23,12 @@
 @font-face {
   font-family: '1545';
   src: url('/1545.ttf') format('truetype');
+}
+
+/* ✅ THE FIX: Make sure to download dotgothic16.ttf into your public folder! */
+@font-face {
+  font-family: 'DotGothic16';
+  src: url('/dotgothic16.ttf') format('truetype');
 }
 
 body {
@@ -379,7 +385,7 @@ button:disabled {
 }
 
 .letter-preview {
-  border: 2px solid #000;
+  /* ✅ THE FIX: The border is now gone from the CSS so it never shows up on the print. It is strictly handled by React. */
   text-align: left;
   box-sizing: border-box;
   width: 100%;
@@ -447,10 +453,9 @@ button:disabled {
   background-size: 4px 4px;
   background-position: 0 0, 2px 2px;
   
-  /* ✅ THE ULTIMATE FIX: Strict pixel width forces the canvas snapshot to stay exactly this wide */
   width: 340px; 
   max-width: 100%;
-  box-sizing: border-box; /* Forces padding to be strictly inside the 340px */
+  box-sizing: border-box; 
   padding: 30px 20px;
   
   font-size: 15px; 
@@ -458,7 +463,6 @@ button:disabled {
   letter-spacing: 0.5px;
   line-height: 1.4; 
   
-  /* Forces text wrapping rigidly so it can never exceed the boundaries */
   white-space: pre-wrap;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -469,6 +473,7 @@ button:disabled {
   box-shadow: inset 0 0 25px rgba(0,0,0,0.06), inset 15px 0 20px rgba(0,0,0,0.03), inset -15px 0 20px rgba(0,0,0,0.03); 
 }
 
+/* ✅ THE FIX: This rule completely guarantees that BOTH the header and the body use the exact same DotGothic16 font */
 .letter-preview.receipt,
 .letter-preview.receipt * {
   font-family: 'DotGothic16', monospace !important;
@@ -479,7 +484,6 @@ button:disabled {
   border-bottom: 2px dashed rgba(56, 56, 56, 0.6);
   padding-bottom: 15px;
   margin-bottom: 15px;
-  /* Also force wrapping on the header */
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word; 
