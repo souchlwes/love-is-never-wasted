@@ -1,8 +1,25 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import html2canvas from "html2canvas";
+import { toPng } from 'html-to-image';
 import Draggable from "react-draggable";
+
+// ✅ THE FIX PART 1: Safari Security Bypass function.
+// This turns your font files into raw text data so Safari can't block them during the screenshot.
+const getBase64Resource = async (url) => {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error("Failed to load resource:", url, e);
+    return null;
+  }
+};
 
 export default function MacMailer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -193,18 +210,46 @@ export default function MacMailer() {
 
   const downloadImage = async () => {
     if (!letterRef.current) return;
-    showToast("Developing your letter..."); 
+    showToast("Developing your letter... (Bypassing Safari Security)"); 
+
     try {
-      const canvas = await html2canvas(letterRef.current, {
-        scale: 2, useCORS: true, backgroundColor: null,
-        onclone: (document, element) => { 
-          element.style.border = 'none'; 
-          element.style.boxShadow = 'none';
+      await document.fonts.ready;
+
+      // 1. Fetch fonts as raw Base64 data to trick the browser
+      const font1742 = await getBase64Resource('/1742.ttf');
+      const font1545 = await getBase64Resource('/1545.ttf');
+
+      // 2. Build a raw CSS string to force-feed into html-to-image
+      let injectedCss = '';
+      if (font1742) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742}') format('truetype'); }\n`;
+      if (font1545) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545}') format('truetype'); }\n`;
+
+      const options = {
+        quality: 1,
+        pixelRatio: 2,
+        fontEmbedCSS: injectedCss, // Inject the raw font code so Safari can't block it
+        style: {
+          border: 'none', 
+          boxShadow: 'none'
         }
-      });
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement("a"); link.href = image; link.download = "loves-never-wasted.png"; link.click();
-    } catch (error) { showToast("Failed to save image. Please try again."); }
+      };
+
+      // ✅ THE FIX PART 2: THE SAFARI HACK
+      // Safari often outputs a blank or wrong-font image on the first try because it hasn't cached the SVG. 
+      // We run the capture function once silently to "warm up" the cache...
+      await toPng(letterRef.current, options);
+      
+      // ...and then immediately run it again to get the actual perfect image!
+      const dataUrl = await toPng(letterRef.current, options);
+      
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "loves-never-wasted.png";
+      link.click();
+    } catch (error) { 
+      console.error("Canvas error:", error);
+      showToast("Failed to save image. Please try again."); 
+    }
   };
 
   return (
@@ -218,6 +263,12 @@ export default function MacMailer() {
               
               <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
                 
+                {paperFormat === 'letter' && (
+                  <div className="letter-top-banner">
+                    <div className="letter-catchphrase">TU PEUX LACHER PRISE</div>
+                  </div>
+                )}
+
                 <div className="letter-header">
                   <div>To: {sentLetter.to}</div>
                   <div>Subject: {sentLetter.subject}</div>
@@ -230,10 +281,9 @@ export default function MacMailer() {
                 
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
 
-                {/* ✅ THE FIX: Catchphrase moved to the bottom, barcode removed completely */}
                 {paperFormat === 'receipt' && (
                   <div className="receipt-bottom-banner">
-                    <div className="receipt-catchphrase">tu peux lacher prise</div>
+                    <div className="receipt-catchphrase">TU PEUX LACHER PRISE</div>
                   </div>
                 )}
               </div>
