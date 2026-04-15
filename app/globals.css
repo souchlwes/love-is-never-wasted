@@ -441,9 +441,8 @@ button:disabled {
    🧾 APOTHECARY LABEL FORMAT (Receipt)
    ========================================= */
 .letter-preview.receipt {
-  /* Vintage cream paper color with authentic texture */
   background-color: #fcfaf5;
-  background-image: url('/texturedpaper.jpg'); /* ✅ THE FIX: Authentic paper background applied */
+  background-image: url('/texturedpaper.jpg'); 
   background-size: cover;
   
   width: 500px; 
@@ -453,7 +452,6 @@ button:disabled {
   
   font-size: 15px; 
   text-transform: uppercase; 
-  letter-spacing: 0.5px;
   line-height: 1.6; 
   
   white-space: pre-wrap;
@@ -467,22 +465,41 @@ button:disabled {
 }
 
 /* Grid Typography */
+
+/* ✅ THE FIX: Ensuring the Tiny Labels (NAME, ELEMENTS) have the lighter black ink bleed texture */
 .tiny-label {
-  /* ✅ THE FIX: Changed labels to match the Bold footer font (1545) */
   font-family: '1545', monospace !important; 
-  font-size: 14px; /* Increased size to match footer weight legibly */
+  font-size: 14px; 
   font-weight: bold;
   letter-spacing: 1px;
   margin-bottom: 5px;
-  color: #1a1a1a;
+  
+  color: #555555; 
+  text-shadow: 
+    0px 0px 1px rgba(85, 85, 85, 0.8), 
+    0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
 
+/* ✅ THE FIX: Ensuring the Grid Data Values (To, Subject) have the DotGothic font, wider spacing, and lighter black ink bleed texture */
 .main-val {
-  /* Grid data values stay crisp as requested */
   font-family: 'DotGothic16', monospace !important;
   font-size: 20px;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  
+  color: #555555; 
+  letter-spacing: 1.5px; 
+  text-shadow: 
+    0px 0px 1px rgba(85, 85, 85, 0.8), 
+    0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
+}
+
+/* ✅ THE FIX: Ensuring the Red Elements stay perfectly Red, but still get the ink bleed texture! */
+.red-text {
+  color: #b32c25 !important;
+  text-shadow: 
+    0px 0px 1px rgba(179, 44, 37, 0.8), 
+    0.5px 0.5px 0.5px rgba(179, 44, 37, 0.3) !important;
 }
 
 /* --- The Body and Footer --- */
@@ -490,25 +507,21 @@ button:disabled {
   padding: 10px 0;
   text-align: justify;
 
-  /* ✅ THE FIX: Applying the precise texture and look from the reference photo */
-  font-family: '1742', monospace !important; /* Switch to slightly fuzzier typewriter font for body realism */
-  color: #555555; /* Lightened color to match peg */
-  letter-spacing: 2px; /* Widened letter spacing as requested */
-  
-  /* Text-shadow simulates authentic typewriter ink bleeding into paper fibers */
+  font-family: 'DotGothic16', monospace !important; 
+  color: #555555; 
+  letter-spacing: 1.5px; /* Wider spacing, but not too much */
   text-shadow: 
     0px 0px 1px rgba(85, 85, 85, 0.8), 
     0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
 
 .letter-preview.receipt .letter-body * {
-  /* Force all body text, lists, etc. to use the texture style */
-  font-family: '1742', monospace !important;
+  font-family: 'DotGothic16', monospace !important;
   color: #555555;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
 }
 
-/* Grid formatting logic unchanged */
+/* Grid formatting logic */
 .apothecary-grid {
   display: flex;
   flex-direction: column;
@@ -533,18 +546,17 @@ button:disabled {
 .apothecary-cell:last-child {
   border-right: none;
 }
-.cell-70 { width: 70%; }
-.cell-30 { width: 30%; }
+
+.cell-60 { width: 60%; }
+.cell-40 { width: 40%; }
 .cell-20 { width: 20%; }
 .cell-80 { width: 80%; }
-.red-text {
-  color: #b32c25;
-  text-shadow: 0.5px 0.5px 0px rgba(179, 44, 37, 0.2);
-}
-.apothecary-cell.cell-30 .main-val.red-text {
+
+.apothecary-cell.cell-40 .main-val.red-text {
   font-size: 26px;
   font-weight: bold;
 }
+
 .apothecary-footer {
   border-top: 2px solid #1a1a1a; 
   margin-top: 20px;
