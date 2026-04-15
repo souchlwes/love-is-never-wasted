@@ -437,72 +437,124 @@ button:disabled {
   text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2);
 }
 
-
 /* =========================================
-   🧾 RECEIPT FORMAT
+   🧾 APOTHECARY LABEL FORMAT (Receipt)
    ========================================= */
 .letter-preview.receipt {
-  background-color: #f6f7f2;
-  background-image: 
-    radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-    radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
-  background-size: 4px 4px;
-  background-position: 0 0, 2px 2px;
+  /* Vintage cream paper color */
+  background-color: #fcfaf5;
+  background-image: none; 
   
-  width: 340px; 
+  /* Wider rectangular layout */
+  width: 500px; 
   max-width: 100%;
   box-sizing: border-box; 
-  padding: 30px 20px;
+  padding: 40px;
   
   font-size: 15px; 
   text-transform: uppercase; 
   letter-spacing: 0.5px;
-  line-height: 1.4; 
+  line-height: 1.6; 
   
   white-space: pre-wrap;
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word; 
   
-  color: #2a2a2a;
-  /* ✅ THE FIX: Thicker, darker text-shadow mimics thermal printing bleed perfectly */
-  text-shadow: 0px 0px 0.8px rgba(42, 42, 42, 0.8), 0.5px 0.5px 1px rgba(42, 42, 42, 0.4);
-  box-shadow: inset 0 0 25px rgba(0,0,0,0.06), inset 15px 0 20px rgba(0,0,0,0.03), inset -15px 0 20px rgba(0,0,0,0.03); 
+  color: #1a1a1a;
+  /* Soft shadow for the text */
+  text-shadow: 0.5px 0.5px 0px rgba(26, 26, 26, 0.2);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.03), 2px 2px 10px rgba(0,0,0,0.1); 
 }
 
 .letter-preview.receipt,
-.letter-preview.receipt * {
+.letter-preview.receipt .letter-body * {
+  /* Body uses the requested DotGothic16 */
   font-family: 'DotGothic16', monospace !important;
 }
 
-/* ✅ THE FIX: Left-aligned metadata specifically for the receipt header */
-.letter-preview.receipt .receipt-header-info {
-  text-align: left; 
-  border-bottom: 2px dashed rgba(42, 42, 42, 0.6);
-  padding-bottom: 15px;
-  margin-bottom: 15px;
+/* --- The Apothecary Grid System --- */
+.apothecary-grid {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  margin-bottom: 25px;
+}
+
+.apothecary-row {
+  display: flex;
+  border-bottom: 1px solid #1a1a1a;
+}
+.apothecary-row:last-child {
+  border-bottom: none;
+}
+
+.apothecary-cell {
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-right: 1px solid #1a1a1a;
+}
+.apothecary-cell:last-child {
+  border-right: none;
+}
+
+/* Column Widths */
+.cell-70 { width: 70%; }
+.cell-30 { width: 30%; }
+.cell-20 { width: 20%; }
+.cell-80 { width: 80%; }
+
+/* Grid Typography */
+.tiny-label {
+  font-family: '1742', monospace !important; /* Typewriter look for small labels */
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  color: #1a1a1a;
+}
+
+.main-val {
+  /* Data values use the body font as requested */
+  font-family: 'DotGothic16', monospace !important;
+  font-size: 20px;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  word-break: break-word; 
-  /* Force a bit of margin between lines if needed */
-  line-height: 1.5;
 }
 
-.receipt-bottom-banner {
-  text-align: center;
-  margin-top: 25px;
-  border-top: 2px dashed rgba(42, 42, 42, 0.6); 
+.red-text {
+  /* Red accent color from the photo */
+  color: #b32c25;
+  text-shadow: 0.5px 0.5px 0px rgba(179, 44, 37, 0.2);
+}
+
+.apothecary-cell.cell-30 .main-val.red-text {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+/* --- The Body and Footer --- */
+.letter-preview.receipt .letter-body {
+  padding: 10px 0;
+  text-align: justify;
+}
+
+.apothecary-footer {
+  border-top: 2px solid #1a1a1a; /* Thick line at the bottom */
+  margin-top: 20px;
   padding-top: 20px;
+  text-align: center;
 }
 
-.letter-preview.receipt .receipt-catchphrase {
+.apothecary-catchphrase {
+  /* Footer uses the 1545 font */
   font-family: '1545', monospace !important;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
   text-transform: uppercase;
-  
-  color: #2a2a2a;
-  text-shadow: 0px 0px 0.8px rgba(42, 42, 42, 0.8), 0.5px 0.5px 1px rgba(42, 42, 42, 0.4);
+  color: #1a1a1a;
 }
 
 /* =========================================
@@ -536,8 +588,22 @@ button:disabled {
     font-size: 12px;
   }
 
-  .letter-preview.letter {
+  .letter-preview.letter,
+  .letter-preview.receipt {
     padding: 30px 20px; 
     min-height: auto;
+  }
+  
+  .apothecary-row {
+    flex-direction: column;
+  }
+  
+  .apothecary-cell {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .apothecary-cell:last-child {
+    border-bottom: none;
   }
 }
