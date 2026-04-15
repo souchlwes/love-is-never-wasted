@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+
 @font-face {
   font-family: 'TheSignature';
   src: url('/thesignature.ttf') format('truetype');
@@ -11,6 +13,16 @@
 @font-face {
   font-family: 'Typewriter';
   src: url('/typewriter.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: '1742';
+  src: url('/1742.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: '1545';
+  src: url('/1545.ttf') format('truetype');
 }
 
 body {
@@ -55,6 +67,11 @@ body {
   max-width: 600px;
 }
 
+/* Extra wide window for the US Letter format */
+.mac-window.extra-wide {
+  max-width: 850px;
+}
+
 .mac-titlebar {
   background-color: #c0c0c0;
   padding: 5px 10px;
@@ -79,6 +96,9 @@ body {
   text-align: center;
   font-family: 'Chicago', monospace;
   transition: background-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Drag and drop active state for file uploads */
@@ -91,6 +111,7 @@ body {
    Forms & Inputs
    ========================================= */
 form {
+  width: 100%;
   text-align: left;
   font-size: 14px;
 }
@@ -111,27 +132,48 @@ input, textarea {
   box-sizing: border-box;
 }
 
+/* Allows the user to drag and resize the message box vertically */
+textarea {
+  min-height: 100px;
+  resize: vertical; 
+}
+
 button {
   padding: 8px 16px;
   border: 3px solid black;
   background: #d0d0d0;
-  box-shadow: inset -3px -3px #808080, inset 3px 3px #ffffff;
+  /* PROTRUDED state (unpressed) */
+  box-shadow: inset 2px 2px #ffffff, inset -2px -2px #808080;
   cursor: pointer;
   font-family: 'Chicago', monospace;
   font-size: 14px;
   margin-top: 10px;
+  transition: all 0.05s;
 }
 
+/* CLICKED/RECESSED state */
 button:active {
-  box-shadow: inset 3px 3px #808080, inset -3px -3px #ffffff;
+  box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
+  transform: translate(1px, 1px);
+  background: #b0b0b0;
+}
+
+/* Persists the pressed look when the style is active */
+button.active {
+  background: #b0b0b0;
+  box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
+  transform: translate(1px, 1px);
 }
 
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background: #cccccc;
+  box-shadow: inset 1px 1px #808080;
 }
 
 .send-button-container {
+  width: 100%;
   text-align: right;
   margin-top: 15px;
 }
@@ -169,16 +211,18 @@ button:disabled {
 }
 
 .zoomed-window {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  right: 10px !important;
+  bottom: 10px !important;
   max-width: none !important;
+  width: calc(100vw - 20px) !important;
   z-index: 9999;
   height: calc(100vh - 20px);
   display: flex;
   flex-direction: column;
+  transform: none !important;
 }
 
 .zoomed-window .mac-content {
@@ -201,18 +245,33 @@ button:disabled {
 
 .editor-toolbar {
   display: flex;
+  flex-wrap: wrap; /* Allows buttons to wrap to a new line on narrow screens */
   gap: 5px;
-  margin-bottom: 5px;
+  margin-bottom: 0;
   background: #c0c0c0;
   border: 2px solid black;
   border-bottom: none;
   padding: 4px;
 }
 
+.toolbar-divider {
+  width: 2px;
+  background: #808080;
+  border-right: 1px solid #ffffff;
+  margin: 0 4px;
+}
+
 .editor-toolbar button {
   margin: 0;
   padding: 4px 10px;
-  box-shadow: inset -2px -2px #808080, inset 2px 2px #ffffff;
+  /* Specific toolbar shadow for smaller buttons */
+  box-shadow: inset 2px 2px #ffffff, inset -2px -2px #808080;
+}
+
+.editor-toolbar button:active,
+.editor-toolbar button.active {
+  background: #b0b0b0;
+  box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
 }
 
 .rich-editor {
@@ -309,23 +368,55 @@ button:disabled {
 }
 
 /* =========================================
-   PDF Letter Preview (The Ink Bleed Effect)
+   Paper Format Toggles & Base Preview
    ========================================= */
+/* Forces iOS Safari to render the select dropdown correctly */
+.retro-select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.retro-select-wrapper::after {
+  content: '▼';
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-family: 'Chicago', monospace;
+  font-size: 10px;
+  pointer-events: none; 
+  color: black;
+}
+
+.format-selector {
+  width: 100%;
+  padding: 8px 30px 8px 10px; 
+  border: 3px solid black;
+  background: #d0d0d0;
+  box-shadow: inset 2px 2px #ffffff, inset -2px -2px #808080;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none; 
+  font-family: 'Chicago', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.format-selector:active {
+  background: #b0b0b0;
+  box-shadow: inset 2px 2px #808080, inset -1px -1px #ffffff;
+}
+
+/* Shared properties for both formats */
 .letter-preview {
-  /* The letter itself gets the specific textured paper */
-  background-image: url('/texturedpaper.jpg');
-  background-size: cover;
-  background-position: center;
-  padding: 40px;
   border: 2px solid #000;
   text-align: left;
-  font-family: 'Typewriter', monospace; 
-  color: rgba(30, 30, 30, 0.95); 
-  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
-  white-space: pre-wrap;
-  font-size: 18px; 
-  line-height: 1.6;
-  box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+  box-sizing: border-box;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  margin: 0 auto;
 }
 
 .letter-header {
@@ -335,29 +426,138 @@ button:disabled {
   font-weight: bold;
 }
 
+
+/* =========================================
+   📄 US LETTER FORMAT
+   ========================================= */
+.letter-preview.letter {
+  background-image: url('/texturedpaper.jpg');
+  background-size: cover;
+  background-position: center;
+  
+  color: rgba(30, 30, 30, 0.95); 
+  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2); 
+  white-space: pre-wrap;
+  line-height: 1.6;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+  
+  max-width: 800px;
+  min-height: 300px; 
+  padding: 60px; 
+  font-size: 18px; 
+}
+
+/* ✅ THE FIX: !important overrides any inline fonts (like Helvetica) from the Rich Text Editor */
+.letter-preview.letter,
+.letter-preview.letter * {
+  font-family: '1742', monospace !important;
+}
+
+.letter-top-banner {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* ✅ THE FIX: Forces the 1545 font specifically on the catchphrase */
+.letter-preview.letter .letter-catchphrase {
+  font-family: '1545', monospace !important;
+  font-size: 26px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: rgba(30, 30, 30, 0.95);
+  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2);
+}
+
+
+/* =========================================
+   🧾 RECEIPT FORMAT
+   ========================================= */
+.letter-preview.receipt {
+  background-color: #f6f7f2;
+  background-image: 
+    radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
+  
+  max-width: 320px; 
+  padding: 30px 20px;
+  
+  font-size: 15px; 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px;
+  line-height: 1.4; 
+  white-space: pre-wrap;
+  
+  color: #383838;
+  text-shadow: 0.5px 0.5px 1px rgba(56, 56, 56, 0.7), -0.2px -0.2px 0px rgba(56, 56, 56, 0.3);
+  box-shadow: inset 0 0 25px rgba(0,0,0,0.06), inset 15px 0 20px rgba(0,0,0,0.03), inset -15px 0 20px rgba(0,0,0,0.03); 
+}
+
+/* ✅ THE FIX: Forces the DotGothic font on all receipt text to override inline HTML */
+.letter-preview.receipt,
+.letter-preview.receipt * {
+  font-family: 'DotGothic16', monospace !important;
+}
+
+.letter-preview.receipt .letter-header {
+  text-align: center;
+  border-bottom: 2px dashed rgba(56, 56, 56, 0.6);
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.receipt-bottom-banner {
+  text-align: center;
+  margin-top: 25px;
+  border-top: 2px dashed rgba(56, 56, 56, 0.6); 
+  padding-top: 20px;
+}
+
+/* ✅ THE FIX: Forces the 1545 font on the receipt catchphrase */
+.letter-preview.receipt .receipt-catchphrase {
+  font-family: '1545', monospace !important;
+  font-size: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  
+  color: #383838;
+  text-shadow: 0.5px 0.5px 1px rgba(56, 56, 56, 0.7), -0.2px -0.2px 0px rgba(56, 56, 56, 0.3);
+}
+
 /* =========================================
    Mobile Optimization / Responsive Layout
    ========================================= */
 @media (max-width: 768px) {
   .layout-container {
-    padding: 20px 15px; /* Softer margins for mobile */
+    padding: 20px 15px; 
   }
 
   .mac-window {
-    box-shadow: 3px 3px #888888; /* Slightly flatter shadow for tight screens */
+    width: 95% !important;
+    margin: 0 auto;
+    box-shadow: 3px 3px #888888; 
   }
 
-  /* THE FIX FOR THE MOBILE ZOOM BUG: 
-   * iOS Safari auto-zooms if inputs are smaller than 16px. 
-   * Forcing 16px prevents the screen from jarringly jumping.
-   */
+  input[type="datetime-local"] {
+    font-size: 16px !important;
+    padding: 8px 10px !important; 
+    min-height: 40px; 
+    height: auto !important; 
+  }
+
   input, .rich-editor {
-    font-size: 16px; 
-    padding: 12px 8px; /* Better touch targets for mobile */
+    font-size: 16px !important; 
+    padding: 12px 8px; 
   }
 
-  .letter-preview {
-    padding: 20px; 
-    font-size: 16px; 
+  .editor-toolbar button {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+
+  .letter-preview.letter {
+    padding: 30px 20px; 
+    min-height: auto;
   }
 }

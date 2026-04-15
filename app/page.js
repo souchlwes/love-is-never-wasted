@@ -18,16 +18,28 @@ export default function MacMailer() {
   
   const [isZoomed, setIsZoomed] = useState(false);
 
+  // Track the chosen paper format
+  const [paperFormat, setPaperFormat] = useState("receipt");
+
+  // Track active formatting toggles
+  const [activeStyles, setActiveStyles] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+    justifyLeft: true,
+    justifyCenter: false,
+    justifyRight: false,
+    justifyFull: false
+  });
+
   const [formValues, setFormValues] = useState({
     to: "", subject: "", message: "", send_time: ""
   });
 
-  // Original Refs
   const audioRef = useRef(null);
   const letterRef = useRef(null);
   const editorRef = useRef(null); 
 
-  // ✅ THE FIX: New Refs for the Draggable windows
   const sentWindowRef = useRef(null);
   const notesWindowRef = useRef(null);
   const musicWindowRef = useRef(null);
@@ -69,8 +81,32 @@ export default function MacMailer() {
     localStorage.setItem('macMailerDraft', JSON.stringify(newValues));
   };
 
+  // Strips copied fonts and keeps it retro plain text
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const text = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
+    document.execCommand("insertText", false, text);
+  };
+
   const formatText = (command) => {
     document.execCommand(command, false, null);
+    
+    // Logic to handle mutually exclusive alignment buttons
+    if (['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull'].includes(command)) {
+      setActiveStyles(prev => ({
+        ...prev,
+        justifyLeft: command === 'justifyLeft',
+        justifyCenter: command === 'justifyCenter',
+        justifyRight: command === 'justifyRight',
+        justifyFull: command === 'justifyFull',
+      }));
+    } else {
+      setActiveStyles(prev => ({
+        ...prev,
+        [command]: !prev[command]
+      }));
+    }
+
     if (editorRef.current) {
       editorRef.current.focus();
       handleInputChange({ target: { name: 'message', value: editorRef.current.innerHTML } });
@@ -144,6 +180,9 @@ export default function MacMailer() {
         setSentLetter(letterData);
         setFileName(""); setFileObj(null);
         setFormValues({ to: "", subject: "", message: "", send_time: "" });
+        
+        setActiveStyles({ bold: false, italic: false, underline: false, justifyLeft: true, justifyCenter: false, justifyRight: false, justifyFull: false });
+        
         if (editorRef.current) editorRef.current.innerHTML = "";
         localStorage.removeItem('macMailerDraft'); 
         setIsZoomed(false); 
@@ -158,7 +197,10 @@ export default function MacMailer() {
     try {
       const canvas = await html2canvas(letterRef.current, {
         scale: 2, useCORS: true, backgroundColor: null,
-        onclone: (document, element) => { element.style.border = 'none'; }
+        onclone: (document, element) => { 
+          element.style.border = 'none'; 
+          element.style.boxShadow = 'none';
+        }
       });
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a"); link.href = image; link.download = "loves-never-wasted.png"; link.click();
@@ -169,14 +211,13 @@ export default function MacMailer() {
     <main className="layout-container">
       
       {sentLetter ? (
-        // ✅ Added nodeRef here
         <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={sentWindowRef}>
-          {/* ✅ Added ref here */}
-          <div className="mac-window wide" ref={sentWindowRef}>
+          <div className={`mac-window ${paperFormat === 'letter' ? 'extra-wide' : 'wide'}`} ref={sentWindowRef}>
             <div className="mac-titlebar draggable-handle">Your Sent Letter</div>
             <div className="mac-content">
               
-              <div className="letter-preview" ref={letterRef}>
+              <div className={`letter-preview ${paperFormat}`} ref={letterRef}>
+                
                 <div className="letter-header">
                   <div>To: {sentLetter.to}</div>
                   <div>Subject: {sentLetter.subject}</div>
@@ -186,11 +227,34 @@ export default function MacMailer() {
                       : new Date().toLocaleString('en-US', { hour12: true })}
                   </div>
                 </div>
+                
                 <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
+
+                {/* ✅ THE FIX: Catchphrase moved to the bottom, barcode removed completely */}
+                {paperFormat === 'receipt' && (
+                  <div className="receipt-bottom-banner">
+                    <div className="receipt-catchphrase">tu peux lacher prise</div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex-between" style={{ marginTop: '20px' }}>
+              <div className="flex-between" style={{ marginTop: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <button onClick={() => setSentLetter(null)}>Write Another</button>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <label style={{ fontWeight: 'bold', margin: 0 }}>Format:</label>
+                  <div className="retro-select-wrapper">
+                    <select 
+                      className="format-selector"
+                      value={paperFormat} 
+                      onChange={(e) => setPaperFormat(e.target.value)}
+                    >
+                      <option value="receipt">Receipt (Narrow)</option>
+                      <option value="letter">US Letter (Wide)</option>
+                    </select>
+                  </div>
+                </div>
+
                 <button onClick={downloadImage}>Save as Image</button>
               </div>
               
@@ -198,9 +262,7 @@ export default function MacMailer() {
           </div>
         </Draggable>
       ) : (
-        // ✅ Added nodeRef here
         <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={notesWindowRef}>
-          {/* ✅ Added ref here */}
           <div className={`mac-window ${isZoomed ? 'zoomed-window' : ''}`} ref={notesWindowRef}>
             
             <div className="mac-titlebar flex-between draggable-handle">
@@ -227,14 +289,24 @@ export default function MacMailer() {
                 <label>Message:</label>
                 
                 <div className="editor-toolbar">
-                  <button type="button" onClick={() => formatText('bold')} style={{fontWeight: 'bold'}}>B</button>
-                  <button type="button" onClick={() => formatText('italic')} style={{fontStyle: 'italic'}}>I</button>
-                  <button type="button" onClick={() => formatText('underline')} style={{textDecoration: 'underline'}}>U</button>
+                  <button type="button" onClick={() => formatText('bold')} className={activeStyles.bold ? 'active' : ''} style={{fontWeight: 'bold'}}>B</button>
+                  <button type="button" onClick={() => formatText('italic')} className={activeStyles.italic ? 'active' : ''} style={{fontStyle: 'italic'}}>I</button>
+                  <button type="button" onClick={() => formatText('underline')} className={activeStyles.underline ? 'active' : ''} style={{textDecoration: 'underline'}}>U</button>
+                  
+                  <div className="toolbar-divider"></div>
+                  
+                  <button type="button" onClick={() => formatText('justifyLeft')} className={activeStyles.justifyLeft ? 'active' : ''}>Left</button>
+                  <button type="button" onClick={() => formatText('justifyCenter')} className={activeStyles.justifyCenter ? 'active' : ''}>Center</button>
+                  <button type="button" onClick={() => formatText('justifyRight')} className={activeStyles.justifyRight ? 'active' : ''}>Right</button>
+                  <button type="button" onClick={() => formatText('justifyFull')} className={activeStyles.justifyFull ? 'active' : ''}>Justify</button>
                 </div>
                 
                 <div
                   className="rich-editor"
                   contentEditable
+                  spellCheck="false" 
+                  autoCorrect="off"
+                  onPaste={handlePaste}
                   ref={editorRef}
                   onInput={handleEditorInput}
                   placeholder="Write your letter here..."
@@ -259,9 +331,7 @@ export default function MacMailer() {
         </Draggable>
       )}
 
-      {/* ✅ Added nodeRef here */}
       <Draggable handle=".mac-titlebar" disabled={isMobile || isZoomed} nodeRef={musicWindowRef}>
-        {/* ✅ Added ref here */}
         <div className="mac-window" ref={musicWindowRef}>
           <div className="mac-titlebar draggable-handle">a couple minutes...</div>
           <div className="mac-content">
