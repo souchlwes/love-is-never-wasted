@@ -1,5 +1,3 @@
-/* ✅ THE FIX: We removed the Google Fonts import so Safari stops blocking it */
-
 @font-face {
   font-family: 'TheSignature';
   src: url('/thesignature.ttf') format('truetype');
@@ -25,7 +23,6 @@
   src: url('/1545.ttf') format('truetype');
 }
 
-/* ✅ THE FIX: Make sure to download dotgothic16.ttf into your public folder! */
 @font-face {
   font-family: 'DotGothic16';
   src: url('/dotgothic16.ttf') format('truetype');
@@ -385,7 +382,6 @@ button:disabled {
 }
 
 .letter-preview {
-  /* ✅ THE FIX: The border is now gone from the CSS so it never shows up on the print. It is strictly handled by React. */
   text-align: left;
   box-sizing: border-box;
   width: 100%;
@@ -468,31 +464,34 @@ button:disabled {
   word-wrap: break-word;
   word-break: break-word; 
   
-  color: #383838;
-  text-shadow: 0.5px 0.5px 1px rgba(56, 56, 56, 0.7), -0.2px -0.2px 0px rgba(56, 56, 56, 0.3);
+  color: #2a2a2a;
+  /* ✅ THE FIX: Thicker, darker text-shadow mimics thermal printing bleed perfectly */
+  text-shadow: 0px 0px 0.8px rgba(42, 42, 42, 0.8), 0.5px 0.5px 1px rgba(42, 42, 42, 0.4);
   box-shadow: inset 0 0 25px rgba(0,0,0,0.06), inset 15px 0 20px rgba(0,0,0,0.03), inset -15px 0 20px rgba(0,0,0,0.03); 
 }
 
-/* ✅ THE FIX: This rule completely guarantees that BOTH the header and the body use the exact same DotGothic16 font */
 .letter-preview.receipt,
 .letter-preview.receipt * {
   font-family: 'DotGothic16', monospace !important;
 }
 
-.letter-preview.receipt .letter-header {
-  text-align: center;
-  border-bottom: 2px dashed rgba(56, 56, 56, 0.6);
+/* ✅ THE FIX: Left-aligned metadata specifically for the receipt header */
+.letter-preview.receipt .receipt-header-info {
+  text-align: left; 
+  border-bottom: 2px dashed rgba(42, 42, 42, 0.6);
   padding-bottom: 15px;
   margin-bottom: 15px;
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word; 
+  /* Force a bit of margin between lines if needed */
+  line-height: 1.5;
 }
 
 .receipt-bottom-banner {
   text-align: center;
   margin-top: 25px;
-  border-top: 2px dashed rgba(56, 56, 56, 0.6); 
+  border-top: 2px dashed rgba(42, 42, 42, 0.6); 
   padding-top: 20px;
 }
 
@@ -502,8 +501,8 @@ button:disabled {
   font-weight: bold;
   text-transform: uppercase;
   
-  color: #383838;
-  text-shadow: 0.5px 0.5px 1px rgba(56, 56, 56, 0.7), -0.2px -0.2px 0px rgba(56, 56, 56, 0.3);
+  color: #2a2a2a;
+  text-shadow: 0px 0px 0.8px rgba(42, 42, 42, 0.8), 0.5px 0.5px 1px rgba(42, 42, 42, 0.4);
 }
 
 /* =========================================
