@@ -395,6 +395,7 @@ button:disabled {
   margin: 0 auto;
 }
 
+
 /* =========================================
    📄 US LETTER FORMAT
    ========================================= */
@@ -411,9 +412,12 @@ button:disabled {
   padding: 60px; 
 }
 
-.letter-top-banner {
+/* ✅ THE FIX: Catchphrase moved to the bottom footer */
+.letter-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1.5px solid rgba(68, 68, 68, 0.6); /* ✅ THE FIX: A crisp line above the text */
   text-align: center;
-  margin-bottom: 20px;
 }
 
 .letter-catchphrase {
@@ -426,17 +430,23 @@ button:disabled {
   text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5), 0.5px 0.5px 0px rgba(0, 0, 0, 0.2);
 }
 
-/* ✅ THE FIX: Tightly packed header sitting right above the divider */
 .letter-header-compact {
   text-align: left;
   margin-bottom: 10px; 
 }
 
 .letter-header-compact div {
-  margin-bottom: 2px; /* Removes huge spacing between lines */
+  margin-bottom: 2px;
 }
 
-/* ✅ THE FIX: Simple, clean dashed divider */
+/* ✅ THE FIX: Labels locked to the 1545 font */
+.letter-header-compact strong {
+  font-family: '1545', monospace !important;
+  margin-right: 8px;
+  color: #555;
+  letter-spacing: 1px;
+}
+
 .vintage-divider {
   border-top: 1.5px dashed rgba(68, 68, 68, 0.6);
   margin: 10px 0 25px 0; 
@@ -446,8 +456,7 @@ button:disabled {
   padding: 0;
 }
 
-/* ✅ THE FIX: Locks in Font 1742 with standard size and stamped texture */
-.letter-preview.font-1742 .letter-header-compact,
+.letter-preview.font-1742 .letter-header-compact div,
 .letter-preview.font-1742 .letter-body,
 .letter-preview.font-1742 .letter-body * {
   font-family: '1742', monospace !important;
@@ -460,12 +469,11 @@ button:disabled {
     0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
 
-/* ✅ THE FIX: Scales down 1669 to a readable size and forcefully applies the exact same stamped texture */
-.letter-preview.font-1669 .letter-header-compact,
+.letter-preview.font-1669 .letter-header-compact div,
 .letter-preview.font-1669 .letter-body,
 .letter-preview.font-1669 .letter-body * {
   font-family: '1669', monospace !important;
-  font-size: 20px !important; /* Script fonts need to be slightly larger than typewriters to be legible, but much smaller than what we had! */
+  font-size: 20px !important; 
   line-height: 1.5;
   color: #444444;
   letter-spacing: 0.5px;
