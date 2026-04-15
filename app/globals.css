@@ -441,9 +441,12 @@ button:disabled {
    🧾 APOTHECARY LABEL FORMAT (Receipt)
    ========================================= */
 .letter-preview.receipt {
-  background-color: #fcfaf5;
+  /* ✅ THE FIX: A darker, earthy vintage tan color */
+  background-color: #e8dcc7; 
   background-image: url('/texturedpaper.jpg'); 
   background-size: cover;
+  /* ✅ THE FIX: Multiply blend mode automatically dyes the white texture paper with the darker vintage cream color */
+  background-blend-mode: multiply; 
   
   width: 500px; 
   max-width: 100%;
@@ -465,8 +468,6 @@ button:disabled {
 }
 
 /* Grid Typography */
-
-/* ✅ THE FIX: Ensuring the Tiny Labels (NAME, ELEMENTS) have the lighter black ink bleed texture */
 .tiny-label {
   font-family: '1545', monospace !important; 
   font-size: 14px; 
@@ -480,7 +481,6 @@ button:disabled {
     0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
 
-/* ✅ THE FIX: Ensuring the Grid Data Values (To, Subject) have the DotGothic font, wider spacing, and lighter black ink bleed texture */
 .main-val {
   font-family: 'DotGothic16', monospace !important;
   font-size: 20px;
@@ -494,7 +494,7 @@ button:disabled {
     0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
 }
 
-/* ✅ THE FIX: Ensuring the Red Elements stay perfectly Red, but still get the ink bleed texture! */
+/* ✅ THE FIX: Red text stays strictly red, but gets the same vintage ink bleed texture */
 .red-text {
   color: #b32c25 !important;
   text-shadow: 
@@ -509,7 +509,7 @@ button:disabled {
 
   font-family: 'DotGothic16', monospace !important; 
   color: #555555; 
-  letter-spacing: 1.5px; /* Wider spacing, but not too much */
+  letter-spacing: 1.5px; 
   text-shadow: 
     0px 0px 1px rgba(85, 85, 85, 0.8), 
     0.5px 0.5px 0.5px rgba(26, 26, 26, 0.3);
