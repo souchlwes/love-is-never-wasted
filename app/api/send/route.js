@@ -31,7 +31,10 @@ export async function POST(request) {
 
       await transporter.sendMail({
         from: `"love's never wasted" <${process.env.EMAIL_USER}>`,
-        to, subject, text: message, attachments
+        to: to, 
+        subject: subject, 
+        html: message, // ✅ THE FIX: Changed 'text:' to 'html:'
+        attachments: attachments
       });
       return NextResponse.json({ success: true, message: "Sent immediately!" });
     }
