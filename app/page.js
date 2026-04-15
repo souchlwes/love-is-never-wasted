@@ -209,19 +209,20 @@ export default function MacMailer() {
     if (!letterRef.current) return;
     
     setIsDownloading(true);
-    showToast("Developing your letter... (Bypassing Safari Security)"); 
+    showToast("Developing your letter..."); 
 
     try {
       await new Promise(resolve => setTimeout(resolve, 150));
       await document.fonts.ready;
 
-      const font1742 = await getBase64Resource('/1742.ttf');
-      const font1545 = await getBase64Resource('/1545.ttf');
+      // ✅ THE FIX: Ensuring the slightly fuzzy Typewriter font is loaded for the body texture
+      const font1742TypewriterFuzzy = await getBase64Resource('/1742.ttf');
+      const font1545Bold = await getBase64Resource('/1545.ttf');
       const fontDotGothic = await getBase64Resource('/dotgothic16.ttf'); 
 
       let injectedCss = '';
-      if (font1742) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742}') format('truetype'); }\n`;
-      if (font1545) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545}') format('truetype'); }\n`;
+      if (font1742TypewriterFuzzy) injectedCss += `@font-face { font-family: '1742'; src: url('${font1742TypewriterFuzzy}') format('truetype'); }\n`;
+      if (font1545Bold) injectedCss += `@font-face { font-family: '1545'; src: url('${font1545Bold}') format('truetype'); }\n`;
       if (fontDotGothic) injectedCss += `@font-face { font-family: 'DotGothic16'; src: url('${fontDotGothic}') format('truetype'); }\n`;
 
       const targetNode = letterRef.current;
@@ -252,7 +253,6 @@ export default function MacMailer() {
     }
   };
 
-  // Helper to format date into numbers for the top right apothecary label
   const formatBottleNumber = (dateString) => {
     const date = dateString ? new Date(dateString) : new Date();
     const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -292,10 +292,8 @@ export default function MacMailer() {
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
                   </>
                 ) : (
-                  /* ✅ THE FIX: Custom Apothecary Grid Layout exactly matching the photo */
                   <>
                     <div className="apothecary-grid">
-                      {/* Row 1 */}
                       <div className="apothecary-row">
                         <div className="apothecary-cell cell-70">
                           <span className="tiny-label">NAME</span>
@@ -310,7 +308,6 @@ export default function MacMailer() {
                         </div>
                       </div>
                       
-                      {/* Row 2 */}
                       <div className="apothecary-row">
                         <div className="apothecary-cell cell-20">
                           <span className="tiny-label">BATCH NO.</span>
@@ -323,10 +320,8 @@ export default function MacMailer() {
                       </div>
                     </div>
                     
-                    {/* The main message area acts as the 'Warning Text' from the peg */}
                     <div className="letter-body" dangerouslySetInnerHTML={{ __html: sentLetter.message }}></div>
 
-                    {/* The thick line and bottom catchphrase matching the peg */}
                     <div className="apothecary-footer">
                       <div className="apothecary-catchphrase">TU PEUX LACHER PRISE</div>
                     </div>
