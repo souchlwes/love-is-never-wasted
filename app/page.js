@@ -194,6 +194,23 @@ export default function MacMailer() {
   const downloadImage = async () => {
     if (!letterRef.current) return;
     showToast("Developing your letter..."); 
+
+    // ✅ THE FIX: Create a temporary style element to inject the font rules
+    const styleEl = document.createElement("style");
+    styleEl.innerHTML = `
+      @font-face {
+        font-family: '1742';
+        src: url('/1742.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: '1545';
+        src: url('/1545.ttf') format('truetype');
+      }
+    `;
+
+    // Append the style tag directly *inside* the element html2canvas is capturing
+    letterRef.current.appendChild(styleEl);
+
     try {
       const canvas = await html2canvas(letterRef.current, {
         scale: 2, useCORS: true, backgroundColor: null,
@@ -205,6 +222,10 @@ export default function MacMailer() {
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a"); link.href = image; link.download = "loves-never-wasted.png"; link.click();
     } catch (error) { showToast("Failed to save image. Please try again."); }
+    finally {
+      // ✅ THE CLEANUP: Remove the temporary style tag so it doesn't clutter the DOM
+      letterRef.current.removeChild(styleEl);
+    }
   };
 
   return (
