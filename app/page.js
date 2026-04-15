@@ -4,6 +4,23 @@ import { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import Draggable from "react-draggable";
 
+// ✅ THE FIX: This function grabs your font file and turns it into raw code 
+// so html2canvas doesn't have to try (and fail) to download it.
+const getBase64Font = async (url) => {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error("Failed to load font:", url, e);
+    return null;
+  }
+};
+
 export default function MacMailer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -193,11 +210,12 @@ export default function MacMailer() {
 
   const downloadImage = async () => {
     if (!letterRef.current) return;
-    showToast("Developing your letter..."); 
+    showToast("Developing your letter... (loading fonts)"); 
 
     try {
-      // ✅ THE FIX PART 1: Force the browser to finish loading all fonts before taking the picture
-      await document.fonts.ready;
+      // ✅ THE FIX: Download the fonts as Base64 strings first
+      const font1742 = await getBase64Font('/1742.ttf');
+      const font1545 = await getBase64Font('/1545.ttf');
 
       const canvas = await html2canvas(letterRef.current, {
         scale: 2, 
@@ -207,18 +225,17 @@ export default function MacMailer() {
           clonedElement.style.border = 'none'; 
           clonedElement.style.boxShadow = 'none';
 
-          // ✅ THE FIX PART 2: Inject absolute URLs directly into the "ghost" window
-          const baseUrl = window.location.origin; // Gets exactly http://localhost:3000 or your Vercel URL
+          // ✅ THE FIX: Inject the raw font code directly into the invisible clone window
           const style = clonedDoc.createElement('style');
-          style.innerHTML = `
-            @font-face { font-family: '1742'; src: url('${baseUrl}/1742.ttf') format('truetype'); }
-            @font-face { font-family: '1545'; src: url('${baseUrl}/1545.ttf') format('truetype'); }
-            @font-face { font-family: 'DotGothic16'; src: url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap'); }
-            @font-face { font-family: 'Typewriter'; src: url('${baseUrl}/typewriter.ttf') format('truetype'); }
-          `;
+          let css = '';
+          if (font1742) css += `@font-face { font-family: '1742'; src: url('${font1742}') format('truetype'); }\n`;
+          if (font1545) css += `@font-face { font-family: '1545'; src: url('${font1545}') format('truetype'); }\n`;
+          
+          style.innerHTML = css;
           clonedDoc.head.appendChild(style);
         }
       });
+      
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a"); link.href = image; link.download = "loves-never-wasted.png"; link.click();
     } catch (error) { 
